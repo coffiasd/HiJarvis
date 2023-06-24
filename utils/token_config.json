@@ -1,0 +1,16 @@
+[
+  {
+    "decimals": 18,
+    "symbol": "ETH",
+    "name": "Ether",
+    "path": "/network/eth.svg",
+    "wallet": "metamask.svg"
+  },
+  {
+    "decimals": 18,
+    "symbol": "Matic",
+    "name": "Ploygon",
+    "path": "/network/polygon.svg",
+    "wallet": "metamask.svg"
+  }
+]

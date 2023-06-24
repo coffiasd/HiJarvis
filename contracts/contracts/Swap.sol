@@ -1,16 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.1;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/Context.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
+// import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+import "openzeppelin-contracts/contracts/utils/Address.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/extensions/draft-IERC20Permit.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
+import "openzeppelin-contracts/contracts/utils/Context.sol";
+import "openzeppelin-contracts/contracts/security/Pausable.sol";
+import "openzeppelin-contracts/contracts/access/Ownable.sol";
+import "openzeppelin-contracts/contracts/utils/Counters.sol";
+import "openzeppelin-contracts/contracts/utils/math/SafeMath.sol";
+import "openzeppelin-contracts/contracts/utils/structs/EnumerableMap.sol";
 
 /**
  * @title SwapERC20 Contract
@@ -70,6 +71,8 @@ contract SwapERC20 is Ownable, Pausable {
     /// @notice Amount in permille (i.e. 12 -> 12/1000 -> 1.2%) of the owner fee
     uint256 public ownerFeePermille = 12;
 
+    uint256 immutable baseRaito = 1_000_000;
+
     // event Begun(uint256 indexed id, address indexed initiator, address indexed counterParty);
     // event Begun(uint256 indexed id, address indexed initiator);
     event Cancelled(uint256 indexed id);
@@ -77,6 +80,9 @@ contract SwapERC20 is Ownable, Pausable {
     event NoOwnerFeeERC20Changed(IERC20 indexed _token, bool indexed _newValue);
     event OwnerFeeAddressChanged(address indexed _address);
     event OwnerFeePermilleChanged(uint256 indexed _feePermille);
+    event RaitoLog(uint256 r);
+    event InstanceEvent(uint256 id, uint256 s, uint256 b);
+    event Pop(uint256 id);
 
     //swap info event.
     event OfferEvent(
@@ -152,7 +158,7 @@ contract SwapERC20 is Ownable, Pausable {
         }
 
         //caculate current offer raito
-        uint256 raito = initiatorAmount.div(counterPartyAmount);
+        uint256 raito = initiatorAmount.mul(baseRaito).div(counterPartyAmount);
 
         //instanceId++
         instanceId.increment();
@@ -225,13 +231,17 @@ contract SwapERC20 is Ownable, Pausable {
             revert TransferError();
         }
 
+        uint256[] memory idsToDelete = new uint256[](instances.length);
+        uint256 index;
+
         //loop the whole initiatorInstances to get a suitable order.
         for (uint256 i = 0; i < instances.length; ) {
             Instance storage instance = instances[i];
-            //if raito is suitable then deal.
+
+            //if raito is suitable then make a deal.
             if (
                 counterPartyMaxAmount > 0 &&
-                expectRaito > instance.raito &&
+                instance.raito >= expectRaito &&
                 counterPartyMaxAmount > instance.counterPartyAmount
             ) {
                 //transfer token to initiatorERC20 user , the amount he expect.
@@ -240,19 +250,36 @@ contract SwapERC20 is Ownable, Pausable {
                     instance.counterPartyAmount
                 );
 
+                emit InstanceEvent(
+                    instance.id,
+                    instance.initiatorAmount,
+                    instance.counterPartyAmount
+                );
+
                 //reduce
                 counterPartyMaxAmount -= instance.counterPartyAmount;
 
                 //delete instances list.
-                removeInstace(i);
+                idsToDelete[index] = instance.id;
 
                 //update instance state.
                 userOrder[instance.initiator][i].state = State.FINISHED;
 
+                unchecked {
+                    ++index;
+                }
                 //emit transfer info.
             }
 
             //save more gas.
+            unchecked {
+                ++i;
+            }
+        }
+
+        //delete deal orders.
+        for (uint256 i = 0; i < idsToDelete.length; ) {
+            removeInstace(idsToDelete[i]);
             unchecked {
                 ++i;
             }
@@ -289,13 +316,15 @@ contract SwapERC20 is Ownable, Pausable {
                 i_instance = instance;
 
                 //delete instance by index.
-                removeInstace(i);
+                removeInstace(id);
 
                 //update state.
                 cancelUserOrder(msg.sender, id);
-                unchecked {
-                    ++i;
-                }
+
+                break;
+            }
+            unchecked {
+                ++i;
             }
         }
 
@@ -314,13 +343,23 @@ contract SwapERC20 is Ownable, Pausable {
 
     /**
      * @notice user cancel his order and refund back his token.
-     * @param index index id from Instances
+     * @param id id from Instances.id
      */
-    function removeInstace(uint256 index) internal {
-        require(index < instances.length, "index out of bound");
+    function removeInstace(uint256 id) internal {
+        for (uint256 i = 0; i < instances.length; ) {
+            Instance storage instance = instances[i];
+            if (instance.id == id) {
+                if (instances.length > 0) {
+                    instances[i] = instances[instances.length - 1];
+                    instances.pop();
+                }
 
-        instances[index] = instances[index - 1];
-        instances.pop();
+                emit Pop(id);
+            }
+            unchecked {
+                ++i;
+            }
+        }
     }
 
     /**
@@ -346,16 +385,16 @@ contract SwapERC20 is Ownable, Pausable {
     /**
      * @notice user order list with BEGUN state.
      */
-    function onSellOffers() external view returns (Instance[] memory) {
+    function onSellOffers() external returns (Instance[] memory) {
         uint256 length = userOrder[msg.sender].length;
 
         Instance[] memory ret;
         uint256 retIndex = 0;
 
         for (uint256 i = 0; i < length; ) {
-            Instance storage order = instances[i];
+            Instance storage order = userOrder[msg.sender][i];
             if (order.initiator == msg.sender && order.state == State.BEGUN) {
-                ret[retIndex] = order;
+                // ret[retIndex] = order;
 
                 unchecked {
                     ++retIndex;
