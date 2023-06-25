@@ -4,13 +4,13 @@
     "symbol": "ETH",
     "name": "Ether",
     "path": "/network/eth.svg",
-    "wallet": "metamask.svg"
+    "address": "0xFFA1753833c5643D512eBc1Ace2c96AAf3861bdC"
   },
   {
     "decimals": 18,
-    "symbol": "Matic",
-    "name": "Ploygon",
-    "path": "/network/polygon.svg",
-    "wallet": "metamask.svg"
+    "symbol": "USDC",
+    "name": "USDC",
+    "path": "/network/usdc.svg",
+    "address": "0xEaB08b7987fAfB772b578236c9CAd4202DD11542"
   }
 ]

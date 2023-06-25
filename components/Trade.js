@@ -1,32 +1,28 @@
-import { BiSortAlt2, BiCog } from "react-icons/bi";
-import { BiChevronDown, BiChevronUp } from "react-icons/bi";
-import { ethers } from 'ethers'
-// import bridgeConfig from "../utils/bridge_config.json";
+//icons.
+import { BiSortAlt2, BiChevronDown } from "react-icons/bi";
+import { BsPlusCircleFill, BsDashCircle } from "react-icons/bs";
+//ethers.
+import { ethers } from 'ethers';
 import tokensConfig from "../utils/token_config.json";
 import { useEffect, useState } from "react";
-
 import styles from '../styles/Home.module.css';
 import Image from "next/image";
-
-import { SiEthereum } from "react-icons/si";
-
+import { useAccount, useNetwork } from 'wagmi'
 //alert
 import { alertService } from '../services';
 
-import { BsPlusCircleFill, BsDashCircle, BsDashCircleFill } from "react-icons/bs";
+import Balance from "./Balance";
 
-// import MyAlgoConnect from '@randlabs/myalgo-connect';
-
-// import Balance from "./Balance";
-
-// import { transferHandle, redeemHandle, algoBalance, algoAssetBalance } from "../bridges/wormhole";
-import ERC20ABI from 'erc-20-abi';
+import SwapERC20 from "../utils/SwapERC20.json";
+import Faucet from "../utils/faucet.json";
 
 export default function Trade() {
-    //current bridge.
-    const [currentBridge, setcurrentBridge] = useState("wormhole");
+    //contract.
+    const { address, isConnected } = useAccount();
+    const Provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = Provider.getSigner();
+    const connectedContract = new ethers.Contract(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS, SwapERC20.abi, signer);
 
-    const [signedVAA, setSignedVAA] = useState("");
     //button loading
     const [loading, setLoading] = useState("");
 
@@ -45,8 +41,8 @@ export default function Trade() {
     const [token1, setToken1] = useState(null);
 
     //token address
-    const [token0Addrs, setToken0Addrs] = useState("");
-    const [token1Addrs, setToken1Addrs] = useState("");
+    const [token0Amount, setToken0Amount] = useState("0.0");
+    const [token1Amount, setToken1Amount] = useState("0.0");
 
     //token balance
     const [token0Balance, setToken0Balance] = useState(0);
@@ -67,14 +63,26 @@ export default function Trade() {
         }
     }, [token0, token1, swapAmount])
 
+
+    //CONTRACT
+    const sell = async () => {
+        console.log(ethers.utils.parseUnits(token0Amount));
+        // console.log(tokensConfig[token0].address, token0Amount, tokensConfig[token1].address, token1Amount);
+        await connectedContract.offer(tokensConfig[token0].address, ethers.utils.parseUnits(token0Amount), tokensConfig[token1].address, ethers.utils.parseUnits(token1Amount), {
+            // nonce: window.ethersProvider.getTransactionCount(address, "latest"),
+            gasLimit: ethers.utils.hexlify(0x100000)
+        });
+    }
+
+    const approval = async () => {
+        let connectedContract = new ethers.Contract(tokensConfig[token0].address, Faucet.abi, signer);
+        connectedContract.approve(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS, ethers.utils.parseUnits(token0Amount));
+        setStage(1);
+    }
+
     //token0 change event.
     async function selectToken0ChangeHandle(index) {
         myModal5ClickHandle();
-        if (index > 1) {
-            // not ready tokens
-            alertService.info("not ready stay tuned");
-            return
-        }
         if (index == token1) {
             setToken1(null);
             setToken1Addrs("");
@@ -86,26 +94,12 @@ export default function Trade() {
     //token1 change event.
     async function selectToken1ChangeHandle(index) {
         myModal6ClickHandle();
-        if (index > 1) {
-            // not ready tokens
-            alertService.info("not ready stay tuned");
-            return
-        }
         if (index == token0) {
             setToken0(null);
             setToken0Addrs("");
             setToken0Balance("");
         }
         setToken1(index);
-    }
-
-    /// control modal
-    const modalClick = () => {
-        if (modal == "") {
-            setModal("modal-open");
-        } else {
-            setModal("");
-        }
     }
 
     const myModal5ClickHandle = () => {
@@ -138,11 +132,9 @@ export default function Trade() {
 
     function buttonHtml() {
         if (stage == 1) {
-            return <button onClick={() => transferHandle(setSignedVAA, swapAmount, tokensConfig[token0], token0Addrs, token1Addrs, alertService, setStage, setLoading)} className={`btn btn-primary w-full normal-case my-5 rounded-xl ${loading}`}>transfer</button>
-        } else if (stage == 2) {
-            return <button onClick={() => redeemHandle(signedVAA, tokensConfig[token1], token0Addrs, token1Addrs, alertService, setStage, setLoading, swapAmount, setToken0Balance, setToken1Balance, token0Balance, token1Balance)} className={`btn btn-primary w-full normal-case my-5 rounded-xl ${loading}`}>redeem</button>
+            return <button onClick={sell} className={`btn btn-primary w-full normal-case my-5 rounded-xl ${loading}`}>List for sell</button>
         } else {
-            return <button disabled className="btn btn-primary w-full normal-case my-5 rounded-xl">List for sell</button>
+            return <button onClick={approval} className="btn btn-primary w-full normal-case my-5 rounded-xl">Approval</button>
         }
     }
 
@@ -196,14 +188,14 @@ export default function Trade() {
                 </div>
 
 
-                {!tab && <div className="flex flex-col px-5 py-5">
+                <div className="flex flex-col px-5 py-5">
                     <div className="h-auto border-solid border-2 rounded-2xl my-5 p-2">
                         <div className="flex flex-row p-2 rounded-2xl border-dotted m-3">
                             <div className="flex form-control max-w-xs">
                                 <label className="label">
                                     <span className="label-text">You Pay</span>
                                 </label>
-                                <input type="text" placeholder="0.0" className="rounded-2xl input w-full max-w-xs" />
+                                <input type="text" placeholder="0.0" value={token0Amount} onChange={(e) => { setToken0Amount(e.target.value) }} className="rounded-2xl input w-full max-w-xs" />
                             </div>
                             <div className="flex-none mt-9 ml-auto">
                                 {token0 != null ? (<div className="w-30 p-2 flex flex-row border-solid border-2 rounded-2xl cursor-pointer" onClick={myModal5ClickHandle}>
@@ -219,7 +211,7 @@ export default function Trade() {
                                 </div>)}
                             </div>
                         </div>
-                        {token0 != null && token0Addrs ? (<Balance index={token0} balance={token0Balance} bridge={currentBridge} network={tokensConfig[token0].name} addrs={token0Addrs} del={setToken0Addrs} />) : ""}
+                        {token0 != null ? (<Balance index={token0} addrs={tokensConfig[token0].address} />) : ""}
                     </div>
 
                     <div className="m-auto">
@@ -233,7 +225,7 @@ export default function Trade() {
                                 <label className="label">
                                     <span className="label-text">You Want Receive</span>
                                 </label>
-                                <input type="text" placeholder="0.0" className="rounded-2xl input w-full max-w-xs" />
+                                <input type="text" value={token1Amount} onChange={(e) => { setToken1Amount(e.target.value) }} className="rounded-2xl input w-full max-w-xs" />
                             </div>
 
                             <div className='flex mt-10 mx-2 cursor-pointer'>
@@ -259,88 +251,15 @@ export default function Trade() {
                                 </div>)}
                             </div>
                         </div>
-                        {token1 != null && token1Addrs ? (<Balance index={token1} balance={token1Balance} bridge={currentBridge} network={tokensConfig[token1].name} addrs={token1Addrs} del={setToken1Addrs} />) : ""}
+                        {token1 != null ? (<Balance index={token1} addrs={tokensConfig[token1].address} />) : ""}
 
                     </div>
 
                     <div>
-                        {buttonHtml()}
+                        {/* {!tab && <button onClick={sell} className={`btn btn-primary w-full normal-case my-5 rounded-xl ${loading} ${token0 == null || token1 == null || !token0Amount || !token1Amount ? 'btn-disabled' : ''}`}>List for sell</button>} */}
+                        {!tab && buttonHtml()}
                     </div>
-                </div>}
-
-
-
-                {tab && <div className="flex flex-col px-5 py-5">
-                    <div className="h-auto border-solid border-2 rounded-2xl my-5 p-2">
-                        <div className="flex flex-row p-2 rounded-2xl border-dotted m-3">
-                            <div className="flex form-control max-w-xs">
-                                <label className="label">
-                                    <span className="label-text">You Pay2</span>
-                                </label>
-                                <input type="text" placeholder="0.0" className="rounded-2xl input w-full max-w-xs" />
-                            </div>
-                            <div className="flex-none mt-9 ml-auto">
-                                {token0 != null ? (<div className="w-30 p-2 flex flex-row border-solid border-2 rounded-2xl cursor-pointer" onClick={myModal5ClickHandle}>
-                                    <div className="flex"
-                                    ><Image alt="" src={tokensConfig[token0].path} width={20} height={20}></Image>
-                                    </div>
-                                    <div className="flex-auto text-center mx-1">{tokensConfig[token0].name}</div>
-                                    <div className="flex"><BiChevronDown size="1rem" />
-                                    </div>
-                                </div>) : (<div className="w-30 p-2 flex flex-row border-solid border-2 rounded-2xl px-2 cursor-pointer" onClick={myModal5ClickHandle}>
-                                    <div className="flex-auto text-center">select</div>
-                                    <div className="flex"><BiChevronDown size="1rem" /></div>
-                                </div>)}
-                            </div>
-                        </div>
-                        {token0 != null && token0Addrs ? (<Balance index={token0} balance={token0Balance} bridge={currentBridge} network={tokensConfig[token0].name} addrs={token0Addrs} del={setToken0Addrs} />) : ""}
-                    </div>
-
-                    <div className="m-auto">
-                        <BiSortAlt2 className="cursor-pointer" size="1.5rem" />
-                    </div>
-                    <div className="border-solid border-2 rounded-2xl my-5 p-2">
-
-                        <div className="flex flex-row p-2 rounded-2xl border-dotted m-3">
-
-                            <div className="flex form-control">
-                                <label className="label">
-                                    <span className="label-text">You Want Receive</span>
-                                </label>
-                                <input type="text" placeholder="0.0" className="rounded-2xl input w-full max-w-xs" />
-                            </div>
-
-                            <div className='flex mt-10 mx-2 cursor-pointer'>
-                                <BsPlusCircleFill size="2rem" />
-                            </div>
-
-                            <div className='flex mt-10 mx-3 cursor-pointer'>
-                                <BsDashCircle size="2rem" />
-                            </div>
-
-
-                            <div className="flex-1 mt-9">
-                                {token1 != null ? (<div className="w-30 p-2 flex flex-row border-solid border-2 rounded-2xl cursor-pointer" onClick={myModal6ClickHandle}>
-                                    <div className="flex"
-                                    ><Image alt="" src={tokensConfig[token1].path} width={20} height={20}></Image>
-                                    </div>
-                                    <div className="flex-auto text-center mx-1">{tokensConfig[token1].name}</div>
-                                    <div className="flex"><BiChevronDown size="1rem" />
-                                    </div>
-                                </div>) : (<div className="w-30 p-2 flex flex-row border-solid border-2 rounded-2xl px-2 cursor-pointer" onClick={myModal6ClickHandle}>
-                                    <div className="flex-auto text-center">select</div>
-                                    <div className="flex"><BiChevronDown size="1rem" /></div>
-                                </div>)}
-                            </div>
-                        </div>
-                        {token1 != null && token1Addrs ? (<Balance index={token1} balance={token1Balance} bridge={currentBridge} network={tokensConfig[token1].name} addrs={token1Addrs} del={setToken1Addrs} />) : ""}
-
-                    </div>
-
-                    <div>
-                        {buttonHtml()}
-                    </div>
-                </div>}
+                </div>
 
 
             </div>

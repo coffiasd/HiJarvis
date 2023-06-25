@@ -2,16 +2,16 @@
 pragma solidity ^0.8.1;
 
 // import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
-import "openzeppelin-contracts/contracts/utils/Address.sol";
-import "openzeppelin-contracts/contracts/token/ERC20/extensions/draft-IERC20Permit.sol";
-import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
-import "openzeppelin-contracts/contracts/utils/Context.sol";
-import "openzeppelin-contracts/contracts/security/Pausable.sol";
-import "openzeppelin-contracts/contracts/access/Ownable.sol";
-import "openzeppelin-contracts/contracts/utils/Counters.sol";
-import "openzeppelin-contracts/contracts/utils/math/SafeMath.sol";
-import "openzeppelin-contracts/contracts/utils/structs/EnumerableMap.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 
 /**
  * @title SwapERC20 Contract
@@ -74,32 +74,33 @@ contract SwapERC20 is Ownable, Pausable {
     uint256 immutable baseRaito = 1_000_000;
 
     // event Begun(uint256 indexed id, address indexed initiator, address indexed counterParty);
-    // event Begun(uint256 indexed id, address indexed initiator);
+    // event Offer(uint256 indexed id, address indexed initiator,uint256 initiatorAmount,address indexed );
     event Cancelled(uint256 indexed id);
     event Finished(uint256 indexed id);
     event NoOwnerFeeERC20Changed(IERC20 indexed _token, bool indexed _newValue);
     event OwnerFeeAddressChanged(address indexed _address);
     event OwnerFeePermilleChanged(uint256 indexed _feePermille);
-    event RaitoLog(uint256 r);
-    event InstanceEvent(uint256 id, uint256 s, uint256 b);
     event Pop(uint256 id);
 
-    //swap info event.
+    //offer event.
     event OfferEvent(
         uint256 indexed id,
-        address indexed initiator,
-        address initiatorERC20,
-        address counterPartyERC20,
-        uint256 initiatorAmount,
-        uint256 counterPartyAmount
+        address indexed initiator, //msg.sender
+        address initiatorERC20, //from token
+        uint256 initiatorAmount, //from amount
+        address counterParty, //to token
+        uint256 counterPartyAmount //to amount
     );
+
+    //buy event.
     event BuyEvent(
         uint256 indexed id,
-        address indexed counterParty,
-        address initiatorERC20,
-        address counterPartyERC20,
-        uint256 initiatorAmount,
-        uint256 counterPartyAmount
+        address indexed buyer,
+        address indexed initiator, //msg.sender
+        address initiatorERC20, //from token
+        uint256 initiatorAmount, //from amount
+        address counterParty, //to token
+        uint256 counterPartyAmount //to amount
     );
 
     error InvalidAddress();
@@ -118,16 +119,16 @@ contract SwapERC20 is Ownable, Pausable {
      */
     constructor(
         address _usdcAddr,
-        address _apeAddr,
+        address _wethAddr,
         address _ownerFeeAddress,
         uint256 _ownerFeePermille
     ) {
         if (_ownerFeeAddress == address(0)) revert InvalidAddress();
 
         erc20s.push(IERC20(_usdcAddr));
-        erc20s.push(IERC20(_apeAddr));
+        erc20s.push(IERC20(_wethAddr));
         supportedErc20s[IERC20(_usdcAddr)] = true;
-        supportedErc20s[IERC20(_apeAddr)] = true;
+        supportedErc20s[IERC20(_wethAddr)] = true;
         ownerFeeAddress = _ownerFeeAddress;
         ownerFeePermille = _ownerFeePermille;
     }
@@ -193,7 +194,15 @@ contract SwapERC20 is Ownable, Pausable {
             raitoIndex.maxRaito = raito;
         }
 
-        // emit Begun(instanceId.current(), msg.sender);
+        //offer emit.
+        emit OfferEvent(
+            instanceId.current(),
+            msg.sender,
+            initiatorERC20,
+            initiatorAmount,
+            counterPartyERC20,
+            counterPartyAmount
+        );
     }
 
     /**
@@ -250,12 +259,6 @@ contract SwapERC20 is Ownable, Pausable {
                     instance.counterPartyAmount
                 );
 
-                emit InstanceEvent(
-                    instance.id,
-                    instance.initiatorAmount,
-                    instance.counterPartyAmount
-                );
-
                 //reduce
                 counterPartyMaxAmount -= instance.counterPartyAmount;
 
@@ -269,6 +272,16 @@ contract SwapERC20 is Ownable, Pausable {
                     ++index;
                 }
                 //emit transfer info.
+
+                emit BuyEvent(
+                    instance.id,
+                    msg.sender,
+                    instance.initiator,
+                    instance.initiatorERC20,
+                    instance.initiatorAmount,
+                    instance.counterPartyERC20,
+                    instance.counterPartyAmount
+                );
             }
 
             //save more gas.
@@ -385,7 +398,7 @@ contract SwapERC20 is Ownable, Pausable {
     /**
      * @notice user order list with BEGUN state.
      */
-    function onSellOffers() external returns (Instance[] memory) {
+    function onSellOffers() external view returns (Instance[] memory) {
         uint256 length = userOrder[msg.sender].length;
 
         Instance[] memory ret;
