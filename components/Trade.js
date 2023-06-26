@@ -48,9 +48,6 @@ export default function Trade() {
     const [token0Balance, setToken0Balance] = useState(0);
     const [token1Balance, setToken1Balance] = useState(0);
 
-    //swap amount
-    const [swapAmount, setSwapAmount] = useState(0);
-
     //alert options
     const options = {
         autoClose: true,
@@ -58,26 +55,98 @@ export default function Trade() {
     }
 
     useEffect(() => {
-        if (token0 != null && token1 != null && swapAmount) {
-            setStage(1);
-        }
-    }, [token0, token1, swapAmount])
+        getToken0Balance();
+        getToken1Balance();
+    }, [token0, token1])
 
+
+    const getToken0Balance = async () => {
+        if (token0 != null) {
+            const connectedContract = new ethers.Contract(tokensConfig[token0].address, Faucet.abi, signer);
+            let b = await connectedContract.balanceOf(address);
+            setToken0Balance(ethers.utils.formatEther(b));
+        }
+    }
+
+    const getToken1Balance = async () => {
+        if (token1 != null) {
+            const connectedContract = new ethers.Contract(tokensConfig[token1].address, Faucet.abi, signer);
+            let b = await connectedContract.balanceOf(address);
+            setToken1Balance(ethers.utils.formatEther(b));
+        }
+    }
 
     //CONTRACT
     const sell = async () => {
-        console.log(ethers.utils.parseUnits(token0Amount));
+        setLoading("loading");
+        setTimeout(() => {
+            setLoading("");
+        }, 122000);
+
         // console.log(tokensConfig[token0].address, token0Amount, tokensConfig[token1].address, token1Amount);
-        await connectedContract.offer(tokensConfig[token0].address, ethers.utils.parseUnits(token0Amount), tokensConfig[token1].address, ethers.utils.parseUnits(token1Amount), {
+        const tx = await connectedContract.offer(tokensConfig[token0].address, ethers.utils.parseUnits(token0Amount), tokensConfig[token1].address, ethers.utils.parseUnits(token1Amount), {
             // nonce: window.ethersProvider.getTransactionCount(address, "latest"),
             gasLimit: ethers.utils.hexlify(0x100000)
         });
+
+        await waitForTransactionCompletion(tx.hash);
+        setLoading("");
+        alertService.info("sell success", options);
+        setToken0(null);
+        setToken1(null);
+        setToken0Amount('0.0');
+        setToken1Amount('0.0');
+        setStage(0);
+    }
+
+    const buy = async () => {
+        setLoading("loading");
+        setTimeout(() => {
+            setLoading("");
+        }, 122000);
+
+        // console.log(tokensConfig[token0].address, token0Amount, tokensConfig[token1].address, token1Amount);
+        const tx = await connectedContract.buy(tokensConfig[token0].address, ethers.utils.parseUnits(token0Amount), tokensConfig[token1].address, ethers.utils.parseUnits(token1Amount), {
+            // nonce: window.ethersProvider.getTransactionCount(address, "latest"),
+            gasLimit: ethers.utils.hexlify(0x100000)
+        });
+
+        await waitForTransactionCompletion(tx.hash);
+        setLoading("");
+        alertService.info("buy success", options);
+        setToken0(null);
+        setToken1(null);
+        setToken0Amount('0.0');
+        setToken1Amount('0.0');
+        setStage(0);
     }
 
     const approval = async () => {
+        if (token0 == null || token1 == null || token0Amount == '0.0' || token1Amount == '0.0') {
+            alertService.info("fill the form", options);
+            return
+        }
+        setLoading("loading");
+        setTimeout(() => {
+            console.log("tricger..");
+            setLoading("");
+        }, 122000);
+
         let connectedContract = new ethers.Contract(tokensConfig[token0].address, Faucet.abi, signer);
-        connectedContract.approve(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS, ethers.utils.parseUnits(token0Amount));
+        const tx = await connectedContract.approve(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS, ethers.utils.parseUnits(token0Amount));
+        await waitForTransactionCompletion(tx.hash);
         setStage(1);
+        setLoading("");
+    }
+
+    async function waitForTransactionCompletion(txHash) {
+        let receipt = null;
+        while (!receipt) {
+            receipt = await new ethers.providers.Web3Provider(window.ethereum).getTransactionReceipt(txHash);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        console.log(receipt);
+        return receipt;
     }
 
     //token0 change event.
@@ -85,8 +154,7 @@ export default function Trade() {
         myModal5ClickHandle();
         if (index == token1) {
             setToken1(null);
-            setToken1Addrs("");
-            setToken1Balance("");
+            // setToken1Balance("");
         }
         setToken0(index);
     }
@@ -96,8 +164,7 @@ export default function Trade() {
         myModal6ClickHandle();
         if (index == token0) {
             setToken0(null);
-            setToken0Addrs("");
-            setToken0Balance("");
+            // setToken0Balance("");
         }
         setToken1(index);
     }
@@ -130,17 +197,40 @@ export default function Trade() {
         }
     }
 
-    function buttonHtml() {
+    function buttonHtmlSell() {
         if (stage == 1) {
-            return <button onClick={sell} className={`btn btn-primary w-full normal-case my-5 rounded-xl ${loading}`}>List for sell</button>
+            return <button onClick={sell} className={`btn btn-primary w-full normal-case my-5 rounded-xl ${loading}`}>Sell</button>
         } else {
-            return <button onClick={approval} className="btn btn-primary w-full normal-case my-5 rounded-xl">Approval</button>
+            return <button onClick={approval} className={`btn btn-primary w-full normal-case my-5 rounded-xl ${loading}`}>Approval To Sell</button>
+        }
+    }
+
+    function buttonHtmlBuy() {
+        if (stage == 1) {
+            return <button onClick={buy} className={`btn btn-primary w-full normal-case my-5 rounded-xl ${loading}`}>Buy</button>
+        } else {
+            return <button onClick={approval} className={`btn btn-primary w-full normal-case my-5 rounded-xl ${loading}`}>Approval To Buy</button>
+        }
+    }
+
+    function token0AmountChange(e) {
+        if (e.target.value >= token0Balance) {
+            setToken0Amount(token0Balance);
+        } else {
+            setToken0Amount(e.target.value);
+        }
+    }
+
+    function token1AmountChange(e) {
+        if (e.target.value >= token1Balance) {
+            setToken1Amount(token1Balance);
+        } else {
+            setToken1Amount(e.target.value);
         }
     }
 
     return (
         <div className="">
-
             <div className={`modal ${modalToken} cursor-pointer ${styles.modalSelf}`} id="my-modal-5">
                 <div className="modal-box bg-base-100">
                     <h3 className="text-lg font-bold">Select Network1</h3>
@@ -182,8 +272,8 @@ export default function Trade() {
 
                 <div className='flex justify-center'>
                     <div className="tabs">
-                        <a className={`tab tab-lg tab-bordered ${tab ? '' : 'tab-active'}`} onClick={(e) => { setTab(false) }}>sell</a>
-                        <a className={`tab tab-lg tab-bordered ${tab ? 'tab-active' : ''}`} onClick={(e) => { setTab(true) }}>buy</a>
+                        <a className={`tab tab-lg tab-bordered ${tab ? '' : 'tab-active'}`} onClick={(e) => { setTab(false); setToken0(null); setToken1(null); setStage(0); setToken0Amount('0.0'); setToken1Amount('0.0'); }}>sell</a>
+                        <a className={`tab tab-lg tab-bordered ${tab ? 'tab-active' : ''}`} onClick={(e) => { setTab(true); setToken0(null); setToken1(null); setStage(0); setToken0Amount('0.0'); setToken1Amount('0.0'); }}>buy</a>
                     </div>
                 </div>
 
@@ -195,7 +285,7 @@ export default function Trade() {
                                 <label className="label">
                                     <span className="label-text">You Pay</span>
                                 </label>
-                                <input type="text" placeholder="0.0" value={token0Amount} onChange={(e) => { setToken0Amount(e.target.value) }} className="rounded-2xl input w-full max-w-xs" />
+                                <input type="text" placeholder="0.0" value={token0Amount} onChange={token0AmountChange} className="rounded-2xl input w-full max-w-xs" />
                             </div>
                             <div className="flex-none mt-9 ml-auto">
                                 {token0 != null ? (<div className="w-30 p-2 flex flex-row border-solid border-2 rounded-2xl cursor-pointer" onClick={myModal5ClickHandle}>
@@ -211,7 +301,7 @@ export default function Trade() {
                                 </div>)}
                             </div>
                         </div>
-                        {token0 != null ? (<Balance index={token0} addrs={tokensConfig[token0].address} />) : ""}
+                        {token0 != null ? (<Balance index={token0} balance={token0Balance} />) : ""}
                     </div>
 
                     <div className="m-auto">
@@ -223,21 +313,21 @@ export default function Trade() {
 
                             <div className="flex form-control">
                                 <label className="label">
-                                    <span className="label-text">You Want Receive</span>
+                                    <span className="label-text">You Receive</span>
                                 </label>
-                                <input type="text" value={token1Amount} onChange={(e) => { setToken1Amount(e.target.value) }} className="rounded-2xl input w-full max-w-xs" />
+                                <input type="text" value={token1Amount} onChange={token1AmountChange} className="rounded-2xl input w-full max-w-xs" />
                             </div>
 
-                            <div className='flex mt-10 mx-2 cursor-pointer'>
+                            {/* <div className='flex mt-10 mx-2 cursor-pointer'>
                                 <BsPlusCircleFill size="2rem" />
                             </div>
 
                             <div className='flex mt-10 mx-3 cursor-pointer'>
                                 <BsDashCircle size="2rem" />
-                            </div>
+                            </div> */}
 
 
-                            <div className="flex-1 mt-9">
+                            <div className="flex-1 mt-9 ml-5">
                                 {token1 != null ? (<div className="w-30 p-2 flex flex-row border-solid border-2 rounded-2xl cursor-pointer" onClick={myModal6ClickHandle}>
                                     <div className="flex"
                                     ><Image alt="" src={tokensConfig[token1].path} width={20} height={20}></Image>
@@ -251,13 +341,15 @@ export default function Trade() {
                                 </div>)}
                             </div>
                         </div>
-                        {token1 != null ? (<Balance index={token1} addrs={tokensConfig[token1].address} />) : ""}
+                        {token1 != null ? (<Balance index={token1} balance={token1Balance} />) : ""}
 
                     </div>
 
                     <div>
                         {/* {!tab && <button onClick={sell} className={`btn btn-primary w-full normal-case my-5 rounded-xl ${loading} ${token0 == null || token1 == null || !token0Amount || !token1Amount ? 'btn-disabled' : ''}`}>List for sell</button>} */}
-                        {!tab && buttonHtml()}
+                        {!tab && buttonHtmlSell()}
+
+                        {tab && buttonHtmlBuy()}
                     </div>
                 </div>
 

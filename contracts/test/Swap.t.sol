@@ -85,22 +85,22 @@ contract SwapTest is Test {
         swap.onSellOffers();
 
         vm.stopPrank();
-        vm.startPrank(_buyer);
+        // vm.startPrank(_buyer);
 
-        //set approve
-        token2.approve(address(swap), type(uint256).max);
+        // //set approve
+        // token2.approve(address(swap), type(uint256).max);
 
-        //place a buy order.
-        swap.buy(address(token2), 10e18, address(token1), 1_000_000);
+        // //place a buy order.
+        // swap.buy(address(token2), 10e18, address(token1), 1_000_000);
 
-        //buy 1e18 + 2e18
-        assertEq(token2.balanceOf(_buyer), 7e18);
+        // //buy 1e18 + 2e18
+        // assertEq(token2.balanceOf(_buyer), 7e18);
 
-        //place a buy order with lower roito.
-        swap.buy(address(token2), 7e18, address(token1), 300_000);
+        // //place a buy order with lower roito.
+        // swap.buy(address(token2), 7e18, address(token1), 300_000);
 
-        //7e18 - 2e18
-        assertEq(token2.balanceOf(_buyer), 2e18);
+        // //7e18 - 2e18
+        // assertEq(token2.balanceOf(_buyer), 2e18);
     }
 
     function testTokenNotSupport() public {

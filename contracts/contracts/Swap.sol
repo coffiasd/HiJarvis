@@ -1,7 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.1;
 
-// import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+// import "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+// import "openzeppelin-contracts/contracts/utils/Address.sol";
+// import "openzeppelin-contracts/contracts/token/ERC20/extensions/draft-IERC20Permit.sol";
+// import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
+// import "openzeppelin-contracts/contracts/utils/Context.sol";
+// import "openzeppelin-contracts/contracts/security/Pausable.sol";
+// import "openzeppelin-contracts/contracts/access/Ownable.sol";
+// import "openzeppelin-contracts/contracts/utils/Counters.sol";
+// import "openzeppelin-contracts/contracts/utils/math/SafeMath.sol";
+// import "openzeppelin-contracts/contracts/utils/structs/EnumerableMap.sol";
+
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol";
@@ -59,6 +69,9 @@ contract SwapERC20 is Ownable, Pausable {
 
     /// @dev Mapping makes up current user orderBook.
     mapping(address => Instance[]) private userOrder;
+
+    /// @dev Mapping makes up finished orders.
+    mapping(address => Instance[]) private finishedOrder;
 
     /// @notice Map of all supported ERC20 tokens
     mapping(IERC20 => bool) public supportedErc20s;
@@ -210,13 +223,13 @@ contract SwapERC20 is Ownable, Pausable {
      * @param counterPartyERC20 counterPartyERC20
      * @param counterPartyMaxAmount counterPartyMaxAmount
      * @param initiatorERC20 initiatorERC20
-     * @param expectRaito expectRaito
+     * @param initiatorAmount amount target token user want to buy
      */
     function buy(
         address counterPartyERC20, //token user pays.
         uint256 counterPartyMaxAmount, //max token user want to pay.
         address initiatorERC20, //token user want to buy
-        uint256 expectRaito
+        uint256 initiatorAmount
     ) external payable whenNotPaused {
         if (counterPartyMaxAmount == 0) revert InvalidAmount();
         if (!supportedErc20s[IERC20(initiatorERC20)]) revert UnsupportedERC20();
@@ -226,6 +239,11 @@ contract SwapERC20 is Ownable, Pausable {
         //begin pay token in contract.
         uint256 beginAmount = IERC20(counterPartyERC20).balanceOf(
             address(this)
+        );
+
+        //caculate current offer raito
+        uint256 expectRaito = initiatorAmount.mul(baseRaito).div(
+            counterPartyMaxAmount
         );
 
         // Transfer initiator's ERC20 tokens to contract.
@@ -251,12 +269,18 @@ contract SwapERC20 is Ownable, Pausable {
             if (
                 counterPartyMaxAmount > 0 &&
                 instance.raito >= expectRaito &&
-                counterPartyMaxAmount > instance.counterPartyAmount
+                counterPartyMaxAmount >= instance.counterPartyAmount
             ) {
                 //transfer token to initiatorERC20 user , the amount he expect.
                 IERC20(counterPartyERC20).safeTransfer(
                     instance.initiator,
                     instance.counterPartyAmount
+                );
+
+                //transfer initiatorERC20 to buyer.
+                IERC20(initiatorERC20).safeTransfer(
+                    msg.sender,
+                    instance.initiatorAmount
                 );
 
                 //reduce
@@ -266,7 +290,8 @@ contract SwapERC20 is Ownable, Pausable {
                 idsToDelete[index] = instance.id;
 
                 //update instance state.
-                userOrder[instance.initiator][i].state = State.FINISHED;
+                // userOrder[instance.initiator][i].state = State.FINISHED;
+                // finishedOrder
 
                 unchecked {
                     ++index;
@@ -401,17 +426,16 @@ contract SwapERC20 is Ownable, Pausable {
     function onSellOffers() external view returns (Instance[] memory) {
         uint256 length = userOrder[msg.sender].length;
 
-        Instance[] memory ret;
+        Instance[] memory ret = new Instance[](length);
         uint256 retIndex = 0;
 
-        for (uint256 i = 0; i < length; ) {
+        for (uint256 i = 0; i < length; i++) {
             Instance storage order = userOrder[msg.sender][i];
             if (order.initiator == msg.sender && order.state == State.BEGUN) {
-                // ret[retIndex] = order;
+                ret[retIndex] = order;
 
                 unchecked {
                     ++retIndex;
-                    ++i;
                 }
             }
         }

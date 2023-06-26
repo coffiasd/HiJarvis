@@ -4,14 +4,22 @@ import dynamic from 'next/dynamic';
 import React from "react";
 import { Alert } from '../components/alert.jsx';
 import { FaRocket } from "react-icons/fa";
-import Link from "next/link"
-import Image from 'next/image'
+import Link from "next/link";
+import Image from 'next/image';
+import { useRouter } from 'next/router'
 
 const Header = dynamic(() => import('../components/Header'), {
   ssr: false,
 })
 
 export default function Home() {
+  const router = useRouter();
+
+  const handleClick = (e) => {
+    e.preventDefault()
+    router.push('/swap')
+  }
+
   return (
     <div className="min-h-screen" data-theme="wireframe">
       <Head>
@@ -30,8 +38,8 @@ export default function Home() {
             <p className="py-6 text-xl font-normal leading-normal mt-0 mb-2">Trade crypto on a next-generation decentralized exchange</p>
           </div>
 
-          <div class="flex flex-col gap-6 mt-10">
-            <div class="not-prose grid grid-cols-3 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="flex flex-col gap-6 mt-10">
+            <div className="not-prose grid grid-cols-3 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
 
               <div className="stats shadow">
 
@@ -64,7 +72,7 @@ export default function Home() {
           </div>
 
           <div>
-            <button className="btn rounded-lg normal-case mt-20">
+            <button className="btn rounded-lg normal-case mt-20" onClick={handleClick}>
               Lanch App &nbsp;
               <FaRocket size="1rem" />
             </button>
