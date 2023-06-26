@@ -9,10 +9,6 @@ import "../contracts/Swap.sol";
 
 import "../src/myERC20.sol";
 
-// import {ERC20} from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
-
-// import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
-
 contract SwapTest is Test {
     MyToken token1;
     MyToken token2;

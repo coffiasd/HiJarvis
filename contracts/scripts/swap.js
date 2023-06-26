@@ -8,14 +8,11 @@ const hre = require("hardhat");
 
 async function main() {
 
-    // const lockedAmount = hre.ethers.utils.parseEther("1");
-    // const Swap = await hre.ethers.getContractFactory("SwapERC20");
-    const swap = await hre.ethers.deployContract("SwapERC20", ["0xEaB08b7987fAfB772b578236c9CAd4202DD11542", "0xFFA1753833c5643D512eBc1Ace2c96AAf3861bdC", "0x52bf58425cAd0B50fFcA8Dbe5447dcE9420a2610", 0]);
-
-    await swap.waitForDeployment();
+    const Swap = await hre.ethers.getContractFactory("SwapERC20");
+    const swap = await Swap.deploy("0xEaB08b7987fAfB772b578236c9CAd4202DD11542", "0xFFA1753833c5643D512eBc1Ace2c96AAf3861bdC", "0x52bf58425cAd0B50fFcA8Dbe5447dcE9420a2610", 0);
 
     console.log(
-        `deployed to ${swap.target}`
+        `deployed to ${swap.address}`
     );
 
 }

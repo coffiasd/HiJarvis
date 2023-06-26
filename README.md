@@ -1,34 +1,79 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# PeerTradeX
 
-## Getting Started
+## Links
 
-First, run the development server:
+- youtube: <https://www.youtube.com/watch?v=mv54n62_t1M&ab_channel=ayden-hackathon>
+- website: <https://digital-tickets-stream.vercel.app/>
 
-```bash
-npm run dev
-# or
-yarn dev
+## Overview
+
+### Summary
+
+### Features
+
+### Flowchart
+
+![alt ""](./public/DST.png)
+
+### Code Snippet
+
+## Support Chains
+
+- Gobi Testnet
+
+## Document tree
+
+```shell
+$ tree -d -L 2 -I 'node_modules'
+PeerTradeX
+├── cache
+├── components     | react components
+├── contracts      | hardhat contracts
+│   ├── artifacts
+│   ├── cache
+│   ├── contracts  |conrtacts .sol file
+│   ├── scripts
+│   ├── src
+│   └── test       |foundry test case
+├── lib            |foundry libs
+│   ├── forge-std
+│   └── openzeppelin-contracts
+├── out
+├── pages          |react pages
+│   └── api
+├── public         |root
+│   └── network
+├── services
+├── styles         |css
+└── utils          |json file.
+
+
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Test
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+```shell
+cd contract
+forge test --match-contract SwapTest -vvv
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+Compiler run successful (with warnings)
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+Running 3 tests for contracts/test/Swap.t.sol:SwapTest
+[PASS] testGetSwapRang() (gas: 836599)
+[PASS] testOfferAndBuy() (gas: 1182303)
+[PASS] testTokenNotSupport() (gas: 13202)
+Test result: ok. 3 passed; 0 failed; finished in 2.01ms
+```
 
-## Learn More
+## Reference
 
-To learn more about Next.js, take a look at the following resources:
+- [1] tailwindcss https://tailwindcss.com/
+- [2] dasyUi https://daisyui.com/
+- [3] next.js https://nextjs.org/
+- [4] ether.js https://docs.ethers.org/v6/
+- [5] hardhat https://hardhat.org/
+- [6] foundry https://book.getfoundry.sh/forge/writing-tests
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+SPDX short identifier: MIT

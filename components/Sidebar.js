@@ -6,7 +6,7 @@ import {
 } from '@rainbow-me/rainbowkit';
 import { useAccount, useNetwork, useSwitchNetwork } from 'wagmi';
 import { useEffect, useState } from "react";
-import { FaShoppingCart, FaListUl } from "react-icons/fa";
+import { FaShoppingCart, FaListUl, FaFaucet } from "react-icons/fa";
 import { useRouter } from 'next/router';
 
 export default function Sidebar() {
@@ -25,12 +25,7 @@ export default function Sidebar() {
         if (isConnected) {
             setLogin(true);
         }
-
-        if (router.asPath == '/history') {
-            setTab(true);
-        } else {
-            setTab(false);
-        }
+        setTab(router.asPath);
     }, [isConnected])
 
     return (
@@ -43,15 +38,20 @@ export default function Sidebar() {
 
             <div className="flex flex-col justify-between flex-1 mt-6">
                 <nav>
-                    <a className={`flex items-center px-4 py-2 text-gray-700 ${tab ? '' : 'bg-gray-100'} rounded-md  dark:text-gray-200`} href="/swap">
+                    <a className={`flex items-center px-4 py-2 text-gray-700 ${tab == '/swap' ? 'bg-gray-100' : ''} rounded-md  dark:text-gray-200`} href="/swap">
                         <FaShoppingCart size="1rem" />
                         <span className="mx-4 font-medium">Trade</span>
                     </a>
 
 
-                    <a className={`flex items-center px-4 py-2 mt-5 text-gray-600 transition-colors duration-300 ${tab ? 'bg-gray-100' : ''} transform rounded-md dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 hover:text-gray-700`} href="/history">
+                    <a className={`flex items-center px-4 py-2 mt-5 text-gray-600 transition-colors duration-300 ${tab == '/history' ? 'bg-gray-100' : ''} transform rounded-md dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 hover:text-gray-700`} href="/history">
                         <FaListUl size="1rem" />
                         <span className="mx-4 font-medium">On-Sale</span>
+                    </a>
+
+                    <a className={`flex items-center px-4 py-2 mt-5 text-gray-600 transition-colors duration-300 ${tab == '/faucet' ? 'bg-gray-100' : ''} transform rounded-md dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 hover:text-gray-700`} href="/faucet">
+                        <FaFaucet size="1rem" />
+                        <span className="mx-4 font-medium">Faucet</span>
                     </a>
 
                 </nav>
