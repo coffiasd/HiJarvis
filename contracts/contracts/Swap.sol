@@ -197,8 +197,6 @@ contract SwapERC20 is Ownable, Pausable {
         //update orderBook list.
         instances.push(instance);
 
-        // InstanceMap storage userInstances = userOrder[msg.sender];
-        // userInstances.instances[instanceId.current()] = instance;
         //update user order list.
         userOrder[msg.sender].push(instance);
 

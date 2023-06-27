@@ -5,8 +5,8 @@
 - USDC:<https://gobi-explorer.horizen.io/address/0xEaB08b7987fAfB772b578236c9CAd4202DD11542>
 - WETH:<https://gobi-explorer.horizen.io/address/0xFFA1753833c5643D512eBc1Ace2c96AAf3861bdC>
 - contract:<https://gobi-explorer.horizen.io/address/0x9B31226C46659FC1B85602abbC0204BeCf8c16AD>
-- youtube:
-- website:
+- youtube:<https://youtu.be/sGOtOid-rjA>
+- website:<https://peer-trade-x.vercel.app/history>
 
 ## Overview
 
@@ -23,77 +23,64 @@ PeerTradeX is an Automated Trades platform where buyers can choose supported ERC
 #### Sell
 
 ```solidity
-        //caculate current offer raito
-        uint256 raito = initiatorAmount.mul(baseRaito).div(counterPartyAmount);
+//caculate current offer raito
+uint256 raito = initiatorAmount.mul(baseRaito).div(counterPartyAmount);
 
-        //instanceId++
-        instanceId.increment();
+//instanceId++
+instanceId.increment();
 
-        //Instance struct.
-        Instance memory instance = Instance({
-            id: instanceId.current(),
-            initiator: msg.sender,
-            initiatorERC20: initiatorERC20,
-            initiatorAmount: initiatorAmount,
-            counterPartyERC20: counterPartyERC20,
-            counterPartyAmount: counterPartyAmount,
-            raito: raito,
-            state: State.BEGUN
-        });
+//Instance struct.
+Instance memory instance = Instance({
+    id: instanceId.current(),
+    initiator: msg.sender,
+    initiatorERC20: initiatorERC20,
+    initiatorAmount: initiatorAmount,
+    counterPartyERC20: counterPartyERC20,
+    counterPartyAmount: counterPartyAmount,
+    raito: raito,
+    state: State.BEGUN
+});
 
-        //update orderBook list.
-        instances.push(instance);
+//update orderBook list.
+instances.push(instance);
 
-        //update user order list.
-        userOrder[msg.sender].push(instance);
+//update user order list.
+userOrder[msg.sender].push(instance);
 ```
 
 #### Buy
 
 ```solidity
-   //loop the whole initiatorInstances to get a suitable order.
-        for (uint256 i = 0; i < instances.length; ) {
-            Instance storage instance = instances[i];
+for (uint256 i = 0; i < instances.length; ) {
+Instance storage instance = instances[i];
 
-            //if raito is suitable then make a deal.
-            if (
-                counterPartyMaxAmount > 0 &&
-                instance.raito >= expectRaito &&
-                counterPartyMaxAmount >= instance.counterPartyAmount
-            ) {
-                //transfer token to initiatorERC20 user , the amount he expect.
-                IERC20(counterPartyERC20).safeTransfer(
-                    instance.initiator,
-                    instance.counterPartyAmount
-                );
+//if raito is suitable then make a deal.
+if (
+    counterPartyMaxAmount > 0 &&
+    instance.raito >= expectRaito &&
+    counterPartyMaxAmount >= instance.counterPartyAmount
+) {
+    //transfer token to initiatorERC20 user , the amount he expect.
+    IERC20(counterPartyERC20).safeTransfer(
+        instance.initiator,
+        instance.counterPartyAmount
+    );
 
-                //transfer initiatorERC20 to buyer.
-                IERC20(initiatorERC20).safeTransfer(
-                    msg.sender,
-                    instance.initiatorAmount
-                );
+    //transfer initiatorERC20 to buyer.
+    IERC20(initiatorERC20).safeTransfer(
+        msg.sender,
+        instance.initiatorAmount
+    );
 
-                //reduce
-                counterPartyMaxAmount -= instance.counterPartyAmount;
+    //reduce
+    counterPartyMaxAmount -= instance.counterPartyAmount;
 
-                //delete instances list.
-                idsToDelete[index] = instance.id;
+    //delete instances list.
+    idsToDelete[index] = instance.id;
 
-                unchecked {
-                    ++index;
-                }
-                //emit transfer info.
-
-                emit BuyEvent(
-                    instance.id,
-                    msg.sender,
-                    instance.initiator,
-                    instance.initiatorERC20,
-                    instance.initiatorAmount,
-                    instance.counterPartyERC20,
-                    instance.counterPartyAmount
-                );
-            }
+    //update user Order.
+    finishInstance(instance.id, instance.initiator);
+}
 ```
 
 ### Deploy Contract
