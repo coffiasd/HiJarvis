@@ -62,11 +62,12 @@ export default function Header() {
             <div className="navbar-end">
                 {isConnected && chain.id != 1663 && <button className="btn btn-sm btn-warning ml-3 normal-case" onClick={() => switchNetwork(1663)}>switch net</button>}
 
-                {isConnected && chain.id == 1663 ?
-                    (<><button className="btn btn-sm btn-info ml-3 normal-case" onClick={openAccountModal}>Profile</button><button className="btn btn-sm btn-error ml-3 normal-case " onClick={openChainModal}>Chain</button></>)
-                    :
-                    (<button className="btn btn-sm btn-error ml-3 normal-case" onClick={openConnectModal}>connect wallet</button>)
+                {isConnected && chain.id == 1663 &&
+                    <><button className="btn btn-sm btn-info ml-3 normal-case" onClick={openAccountModal}>Profile</button><button className="btn btn-sm btn-error ml-3 normal-case " onClick={openChainModal}>Chain</button></>
+
                 }
+
+                {!isConnected && <button className="btn btn-sm btn-error ml-3 normal-case" onClick={openConnectModal}>connect wallet</button>}
             </div>
         </div >
     )

@@ -2,20 +2,110 @@
 
 ## Links
 
-- youtube: <https://www.youtube.com/watch?v=mv54n62_t1M&ab_channel=ayden-hackathon>
-- website: <https://digital-tickets-stream.vercel.app/>
+- USDC:<https://gobi-explorer.horizen.io/address/0xEaB08b7987fAfB772b578236c9CAd4202DD11542>
+- WETH:<https://gobi-explorer.horizen.io/address/0xFFA1753833c5643D512eBc1Ace2c96AAf3861bdC>
+- contract:<https://gobi-explorer.horizen.io/address/0x9B31226C46659FC1B85602abbC0204BeCf8c16AD>
+- youtube:
+- website:
 
 ## Overview
 
 ### Summary
 
-### Features
+PeerTradeX is an Automated Trades platform where buyers can choose supported ERC20 tokens and their desired target tokens for exchange. They can also select their preferred exchange rates through the user interface (UI). Once the interaction is completed on the UI, the buyers can deposit their ERC20 tokens into the smart contract. Similarly, sellers can perform similar actions by selecting exchange rates that they find suitable. We will then search for orders in the contract pool that match the desired exchange rates until the specified token quantity from the user is reached. Upon completion of the transaction, the corresponding token quantity will be automatically sent to the seller. All transactions are conducted automatically based on the user's set ratio and the smart contract.
 
 ### Flowchart
 
-![alt ""](./public/DST.png)
+![alt ""](./public/flowchart.png)
 
 ### Code Snippet
+
+#### Sell
+
+```solidity
+        //caculate current offer raito
+        uint256 raito = initiatorAmount.mul(baseRaito).div(counterPartyAmount);
+
+        //instanceId++
+        instanceId.increment();
+
+        //Instance struct.
+        Instance memory instance = Instance({
+            id: instanceId.current(),
+            initiator: msg.sender,
+            initiatorERC20: initiatorERC20,
+            initiatorAmount: initiatorAmount,
+            counterPartyERC20: counterPartyERC20,
+            counterPartyAmount: counterPartyAmount,
+            raito: raito,
+            state: State.BEGUN
+        });
+
+        //update orderBook list.
+        instances.push(instance);
+
+        //update user order list.
+        userOrder[msg.sender].push(instance);
+```
+
+#### Buy
+
+```solidity
+   //loop the whole initiatorInstances to get a suitable order.
+        for (uint256 i = 0; i < instances.length; ) {
+            Instance storage instance = instances[i];
+
+            //if raito is suitable then make a deal.
+            if (
+                counterPartyMaxAmount > 0 &&
+                instance.raito >= expectRaito &&
+                counterPartyMaxAmount >= instance.counterPartyAmount
+            ) {
+                //transfer token to initiatorERC20 user , the amount he expect.
+                IERC20(counterPartyERC20).safeTransfer(
+                    instance.initiator,
+                    instance.counterPartyAmount
+                );
+
+                //transfer initiatorERC20 to buyer.
+                IERC20(initiatorERC20).safeTransfer(
+                    msg.sender,
+                    instance.initiatorAmount
+                );
+
+                //reduce
+                counterPartyMaxAmount -= instance.counterPartyAmount;
+
+                //delete instances list.
+                idsToDelete[index] = instance.id;
+
+                unchecked {
+                    ++index;
+                }
+                //emit transfer info.
+
+                emit BuyEvent(
+                    instance.id,
+                    msg.sender,
+                    instance.initiator,
+                    instance.initiatorERC20,
+                    instance.initiatorAmount,
+                    instance.counterPartyERC20,
+                    instance.counterPartyAmount
+                );
+            }
+```
+
+### Deploy Contract
+
+```shell
+npm i
+cd contract
+//deploy faucet tokens.
+npx hardhat run scripts/faucet.js --network zen
+//deploy main contract using 2 faucet token addresses.
+npx hardhat run scripts/swap.js --network zen
+```
 
 ## Support Chains
 
@@ -46,8 +136,6 @@ PeerTradeX
 ├── services
 ├── styles         |css
 └── utils          |json file.
-
-
 ```
 
 ## Test

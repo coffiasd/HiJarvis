@@ -18,7 +18,8 @@ contract SwapTest is Test {
     address _seller = address(2);
 
     event Balance(uint256 s, uint256 b);
-    event Raito(uint256 min, uint256 max);
+    // event Raito(uint256 min, uint256 max);
+    event OrderId(uint256 id, SwapERC20.State s);
 
     error UnsupportedERC20();
 
@@ -78,25 +79,30 @@ contract SwapTest is Test {
         assertEq(min, 400_000);
         assertEq(max, 2_000_000);
 
-        swap.onSellOffers();
+        SwapERC20.Instance[] memory instan = swap.onSellOffers();
+
+        for (uint256 i = 0; i < instan.length; i++) {
+            emit OrderId(instan[i].id, instan[i].state);
+        }
 
         vm.stopPrank();
-        // vm.startPrank(_buyer);
+        vm.startPrank(_buyer);
 
-        // //set approve
-        // token2.approve(address(swap), type(uint256).max);
+        //set approve
+        token2.approve(address(swap), type(uint256).max);
 
-        // //place a buy order.
-        // swap.buy(address(token2), 10e18, address(token1), 1_000_000);
+        //place a buy order.
+        swap.buy(address(token2), 2e18, address(token1), 2e18);
 
-        // //buy 1e18 + 2e18
-        // assertEq(token2.balanceOf(_buyer), 7e18);
+        vm.stopPrank();
+        vm.startPrank(_seller);
+        SwapERC20.Instance[] memory instanAfterBuy = swap.onSellOffers();
+        for (uint256 i = 0; i < instanAfterBuy.length; i++) {
+            emit OrderId(instanAfterBuy[i].id, instanAfterBuy[i].state);
+        }
 
-        // //place a buy order with lower roito.
-        // swap.buy(address(token2), 7e18, address(token1), 300_000);
-
-        // //7e18 - 2e18
-        // assertEq(token2.balanceOf(_buyer), 2e18);
+        //buy 1e18 + 2e18
+        assertEq(token2.balanceOf(_buyer), 9e18);
     }
 
     function testTokenNotSupport() public {

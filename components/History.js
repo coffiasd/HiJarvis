@@ -21,28 +21,6 @@ export default function History() {
         setLists(result);
     }
 
-    const fetchFinishedItems = async () => {
-        let contract = new ethers.Contract(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS, SwapERC20.abi, signer);
-        // let filter = contract.filters.OfferEvent(null, '0x52bf58425cAd0B50fFcA8Dbe5447dcE9420a2610');
-        let filter = {
-            address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
-            topics: [
-                ethers.utils.id("OfferEvent(uint256,address,address,uint256,address,uint256)"),
-                null,
-                ethers.utils.hexZeroPad('0x52bf58425cAd0B50fFcA8Dbe5447dcE9420a2610', 32)
-            ]
-        };
-
-
-        let logs = await contract.queryFilter(filter, 350428, 351428);
-        console.log("=========================================");
-        console.log(logs);
-
-    }
-
-    // const fetchCanceledItems = async () => {
-    // }
-
     const getIcon = (address) => {
         for (let i = 0; i < tokensConfig.length; i++) {
             if (tokensConfig[i].address == address) {
@@ -52,9 +30,19 @@ export default function History() {
         return '';
     }
 
+    function timestampToDateTimeString(timestamp) {
+        const date = new Date(timestamp * 1000);
+        const year = date.getFullYear();
+        const month = ("0" + (date.getMonth() + 1)).slice(-2);
+        const day = ("0" + date.getDate()).slice(-2);
+        const hours = ("0" + date.getHours()).slice(-2);
+        const minutes = ("0" + date.getMinutes()).slice(-2);
+
+        return `${month}-${day} ${hours}:${minutes}`;
+    }
+
     useEffect(() => {
         fetchOnSaleItems();
-        fetchFinishedItems();
     }, [])
 
     return (
@@ -65,16 +53,12 @@ export default function History() {
                 <div className='mx-2 text-2xl font-bold'>Lists</div>
             </div>
             <div className="divider"></div>
-            {/* <div className="tabs">
-                <a className="tab tab-bordered tab-active">On-Sale Items</a>
-                <a className="tab tab-bordered">Finished Deals</a>
-                <a className="tab tab-bordered">Canceled Sales</a>
-            </div> */}
 
             <table className="table mt-10 w-96">
                 <thead>
                     <tr>
                         <th>ID</th>
+                        <th>Time</th>
                         <th>Sell</th>
                         <th>Value</th>
                         <th>For</th>
@@ -86,12 +70,14 @@ export default function History() {
 
                     {lists && lists.filter(item => item.id.toString() !== '0').map((item, index) => (
                         <tr key={index}>
-                            <th>{item.id.toString()}</th>
+                            <th>{index}</th>
+                            <th>{timestampToDateTimeString(item.timestamp.toString())}</th>
                             <td><Image alt="" src={getIcon(item.initiatorERC20)} width={25} height={25} /></td>
                             <td>${ethers.utils.formatUnits(item.initiatorAmount, 18)}</td>
                             <td><Image alt="" src={getIcon(item.counterPartyERC20)} width={25} height={25} /></td>
                             <td>${ethers.utils.formatUnits(item.counterPartyAmount, 18)}</td>
-                            <td><button className="btn btn-outline btn-success btn-sm">On-Sale</button></td>
+                            {item.state == 0 && <td><button className="btn btn-outline btn-warning btn-sm">Sale</button></td>}
+                            {item.state == 1 && <td><button className="btn btn-outline btn-success btn-sm">Deal</button></td>}
                         </tr>
                     ))}
 

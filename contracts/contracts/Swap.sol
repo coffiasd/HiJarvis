@@ -49,6 +49,7 @@ contract SwapERC20 is Ownable, Pausable {
         address counterPartyERC20;
         uint256 counterPartyAmount;
         uint256 raito;
+        uint256 timestamp;
         State state; //order state enum.
     }
 
@@ -72,6 +73,9 @@ contract SwapERC20 is Ownable, Pausable {
 
     /// @dev Mapping makes up finished orders.
     mapping(address => Instance[]) private finishedOrder;
+
+    /// @dev Mapping canceled orders.
+    mapping(address => Instance[]) private canceledOrder;
 
     /// @notice Map of all supported ERC20 tokens
     mapping(IERC20 => bool) public supportedErc20s;
@@ -186,12 +190,15 @@ contract SwapERC20 is Ownable, Pausable {
             counterPartyERC20: counterPartyERC20,
             counterPartyAmount: counterPartyAmount,
             raito: raito,
+            timestamp: block.timestamp,
             state: State.BEGUN
         });
 
         //update orderBook list.
         instances.push(instance);
 
+        // InstanceMap storage userInstances = userOrder[msg.sender];
+        // userInstances.instances[instanceId.current()] = instance;
         //update user order list.
         userOrder[msg.sender].push(instance);
 
@@ -289,14 +296,12 @@ contract SwapERC20 is Ownable, Pausable {
                 //delete instances list.
                 idsToDelete[index] = instance.id;
 
-                //update instance state.
-                // userOrder[instance.initiator][i].state = State.FINISHED;
-                // finishedOrder
+                //update user Order.
+                finishInstance(instance.id, instance.initiator);
 
                 unchecked {
                     ++index;
                 }
-                //emit transfer info.
 
                 emit BuyEvent(
                     instance.id,
@@ -345,6 +350,8 @@ contract SwapERC20 is Ownable, Pausable {
     function cancel(uint256 id) external whenNotPaused {
         Instance memory i_instance;
 
+        Instance[] storage can = canceledOrder[msg.sender];
+
         for (uint256 i = 0; i < instances.length; ) {
             Instance storage instance = instances[i];
             if (instance.id == id) {
@@ -353,6 +360,7 @@ contract SwapERC20 is Ownable, Pausable {
 
                 i_instance = instance;
 
+                can.push(instance);
                 //delete instance by index.
                 removeInstace(id);
 
@@ -388,14 +396,23 @@ contract SwapERC20 is Ownable, Pausable {
             Instance storage instance = instances[i];
             if (instance.id == id) {
                 if (instances.length > 0) {
+                    emit Pop(id);
                     instances[i] = instances[instances.length - 1];
                     instances.pop();
                 }
-
-                emit Pop(id);
             }
             unchecked {
                 ++i;
+            }
+        }
+    }
+
+    function finishInstance(uint256 id, address initiator) internal {
+        //update user orders.
+        Instance[] storage order = userOrder[initiator];
+        for (uint256 i = 0; i < order.length; i++) {
+            if (order[i].id == id) {
+                order[i].state = State.FINISHED;
             }
         }
     }
@@ -407,7 +424,6 @@ contract SwapERC20 is Ownable, Pausable {
      */
     function cancelUserOrder(address user, uint256 id) internal {
         uint256 userOrderLength = userOrder[user].length;
-
         for (uint256 i = 0; i < userOrderLength; i++) {
             Instance storage order = userOrder[user][i];
             if (
@@ -424,23 +440,7 @@ contract SwapERC20 is Ownable, Pausable {
      * @notice user order list with BEGUN state.
      */
     function onSellOffers() external view returns (Instance[] memory) {
-        uint256 length = userOrder[msg.sender].length;
-
-        Instance[] memory ret = new Instance[](length);
-        uint256 retIndex = 0;
-
-        for (uint256 i = 0; i < length; i++) {
-            Instance storage order = userOrder[msg.sender][i];
-            if (order.initiator == msg.sender && order.state == State.BEGUN) {
-                ret[retIndex] = order;
-
-                unchecked {
-                    ++retIndex;
-                }
-            }
-        }
-
-        return ret;
+        return userOrder[msg.sender];
     }
 
     /**
