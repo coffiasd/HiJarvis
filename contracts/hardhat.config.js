@@ -5,10 +5,9 @@ require("dotenv").config();
 module.exports = {
   solidity: "0.8.17",
   networks: {
-    zen: {
-      url: 'https://gobi-testnet.horizenlabs.io/ethv1',
+    'zora-goerli': {
+      url: 'https://testnet.rpc.zora.energy/',
       accounts: [process.env.PRIVATE_KEY],
-      gasPrice: "auto"
-    },
+    }
   }
 }

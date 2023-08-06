@@ -6,7 +6,7 @@ import {
 } from '@rainbow-me/rainbowkit';
 import { useAccount, useNetwork, useSwitchNetwork } from 'wagmi';
 import { useEffect, useState } from "react";
-import { FaShoppingCart, FaListUl, FaFaucet } from "react-icons/fa";
+import { FaRobot } from "react-icons/fa";
 import { useRouter } from 'next/router';
 
 export default function Sidebar() {
@@ -32,18 +32,18 @@ export default function Sidebar() {
         <aside className="absolute flex flex-col w-64 h-screen px-4 py-8 overflow-y-auto bg-white border-r rtl:border-r-0 rtl:border-l dark:bg-gray-900 dark:border-gray-700 top-0 left-0 md:hidden lg:flex">
             <a className='ml-5 in-line flex items-center' href="/">
                 <FaOctopusDeploy className='text-success' size="1.5rem" />
-                <span className="ml-5">PeerTradeX</span>
+                <span className="ml-5">ChatSiri</span>
             </a>
 
 
             <div className="flex flex-col justify-between flex-1 mt-6">
                 <nav>
-                    <a className={`flex items-center px-4 py-2 text-gray-700 ${tab == '/swap' ? 'bg-gray-100' : ''} rounded-md  dark:text-gray-200`} href="/swap">
-                        <FaShoppingCart size="1rem" />
-                        <span className="mx-4 font-medium">Trade</span>
+                    <a className={`flex items-center px-4 py-2 text-gray-700 ${tab == '/chat' ? 'bg-gray-100' : ''} rounded-md  dark:text-gray-200`} href="/chat">
+                        <FaRobot size="1rem" />
+                        <span className="mx-4 font-medium">Chat</span>
                     </a>
 
-
+{/* 
                     <a className={`flex items-center px-4 py-2 mt-5 text-gray-600 transition-colors duration-300 ${tab == '/history' ? 'bg-gray-100' : ''} transform rounded-md dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 hover:text-gray-700`} href="/history">
                         <FaListUl size="1rem" />
                         <span className="mx-4 font-medium">On-Sale</span>
@@ -52,7 +52,7 @@ export default function Sidebar() {
                     <a className={`flex items-center px-4 py-2 mt-5 text-gray-600 transition-colors duration-300 ${tab == '/faucet' ? 'bg-gray-100' : ''} transform rounded-md dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 hover:text-gray-700`} href="/faucet">
                         <FaFaucet size="1rem" />
                         <span className="mx-4 font-medium">Faucet</span>
-                    </a>
+                    </a> */}
 
                 </nav>
 

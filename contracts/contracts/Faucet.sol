@@ -29,3 +29,5 @@ contract Faucet is ERC20 {
         return false;
     }
 }
+
+//forge create src/MyContract.sol:MyContract --chain-id 999 --rpc-url https://testnet.rpc.zora.energy/ --private-key $PRIVATE_KEY --verify --verifier blockscout --verifier-url https://testnet.explorer.zora.energy/api\?
