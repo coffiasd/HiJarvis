@@ -25,10 +25,8 @@ export default function Home() {
 
             <div className='relative'>
                 <Sidebar />
-                <div className='flex justify-center m-auto'>
-                    <div className='mt-20'>
-                        <Chat />
-                    </div>
+                <div className='flex justify-center'>
+                    <Chat />
                 </div>
             </div>
 

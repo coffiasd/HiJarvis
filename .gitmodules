@@ -2,7 +2,7 @@
 	path = lib/openzeppelin-contracts
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
 [submodule "lib\\openzeppelin-contracts"]
-	branch = v4.9.2
+	branch = v4.9.3
 [submodule "lib/forge-std"]
 	path = lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
@@ -11,3 +11,6 @@
 [submodule "hello_siri/lib/forge-std"]
 	path = hello_siri/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "hello_siri/lib/openzeppelin-contracts"]
+	path = hello_siri/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts

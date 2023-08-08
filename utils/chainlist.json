@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Base Goerli",
+    "chainId":84531
+  },
+    {
+    "name": "Zora Goerli",
+    "chainId":999
+  },
+  {
+    "name": "Mode Sepolia",
+    "chainId":919
+  }
+]

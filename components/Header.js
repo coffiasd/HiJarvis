@@ -34,7 +34,7 @@ export default function Header() {
                         </Link>
                     </li>
                     <li className='mt-1'>
-                        <Link href="https://twitter.com/coffiasd">
+                        <Link href="https://twitter.com/coffiasse">
                             <a target="_blank" className={`${styles.leftToRight}`}>
                                 <FaTwitter size="1.2rem" />&nbsp;&nbsp;<div className='font-bold'>TWITTER</div>
                             </a>
@@ -59,7 +59,7 @@ export default function Header() {
                 </ul>
             </div>
 
-            <div className="navbar-end">
+            {/* <div className="navbar-end">
                 {isConnected && chain.id != 1663 && <button className="btn btn-sm btn-warning ml-3 normal-case" onClick={() => switchNetwork(1663)}>switch net</button>}
 
                 {isConnected && chain.id == 1663 &&
@@ -68,7 +68,7 @@ export default function Header() {
                 }
 
                 {!isConnected && <button className="btn btn-sm btn-error ml-3 normal-case" onClick={openConnectModal}>connect wallet</button>}
-            </div>
+            </div> */}
         </div >
     )
 }

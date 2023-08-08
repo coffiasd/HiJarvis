@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {ERC20} from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 
 contract Faucet is ERC20 {
     uint256 public constant tokenAmount = 10e18;
@@ -29,5 +29,3 @@ contract Faucet is ERC20 {
         return false;
     }
 }
-
-//forge create src/MyContract.sol:MyContract --chain-id 999 --rpc-url https://testnet.rpc.zora.energy/ --private-key $PRIVATE_KEY --verify --verifier blockscout --verifier-url https://testnet.explorer.zora.energy/api\?

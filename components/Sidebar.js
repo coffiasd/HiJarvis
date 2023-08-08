@@ -29,10 +29,10 @@ export default function Sidebar() {
     }, [isConnected])
 
     return (
-        <aside className="absolute flex flex-col w-64 h-screen px-4 py-8 overflow-y-auto bg-white border-r rtl:border-r-0 rtl:border-l dark:bg-gray-900 dark:border-gray-700 top-0 left-0 md:hidden lg:flex">
+        <aside className="absolute flex flex-col w-64 h-screen px-4 py-8 overflow-y-auto bg-white border-r rtl:border-r-0 rtl:border-l dark:bg-gray-900 dark:border-gray-700 top-0 left-0 lg:flex md:hidden">
             <a className='ml-5 in-line flex items-center' href="/">
                 <FaOctopusDeploy className='text-success' size="1.5rem" />
-                <span className="ml-5">ChatSiri</span>
+                <span className="ml-5">Jarvis</span>
             </a>
 
 
@@ -56,7 +56,7 @@ export default function Sidebar() {
 
                 </nav>
 
-                <div className=''>
+                {/* <div className=''>
                     {login && chain.id != 1663 && <button className="btn btn-sm btn-warning ml-3 normal-case" onClick={() => switchNetwork(1663)}>switch net</button>}
 
                     {login && chain.id == 1663 &&
@@ -65,7 +65,7 @@ export default function Sidebar() {
                     }
 
                     {!login && <button className="btn btn-sm btn-error ml-3 normal-case" onClick={openConnectModal}>connect wallet</button>}
-                </div>
+                </div> */}
             </div>
         </aside>
     )

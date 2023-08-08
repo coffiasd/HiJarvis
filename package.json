@@ -12,6 +12,8 @@
     "@nomicfoundation/hardhat-toolbox": "^2.0.0",
     "@openzeppelin/contracts": "^4.9.2",
     "@rainbow-me/rainbowkit": "^1.0.3",
+    "@safe-global/protocol-kit": "^1.2.0",
+    "@safe-global/safe-core-sdk-types": "^2.2.0",
     "ai": "^2.1.31",
     "axios": "^1.4.0",
     "chart.js": "^3.9.1",
