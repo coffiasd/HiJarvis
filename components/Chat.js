@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import Head from 'next/head'
-import Image from 'next/image'
 // import { Inter } from 'next/font/google'
 import styles from '../styles/Home.module.css';
 import axios from 'axios';
@@ -21,7 +19,7 @@ export default function Chat() {
 
     const promptSwitchNetwork = `If user want to switch network,you need to ask for the name of network, ${promptStr} is the chainlist we support now, after user input the chain name,you need to convert it to chainId based on the json file.If user choose a network we are not supported now say sorry and tell them we are not support switch to this network`;
 
-    const promptCreateAbstractionAccount = "If user want to create abstraction account(aa), you need to ask for three owner addresses,after you get three owner address you can call `createAbstractionAccountFunc` function and pass in three arguments";
+    const promptCreateAbstractionAccount = "If user want to create abstraction account, you need to ask for three owner addresses before return `createAbstractionAccoun` function,after you get three owner address you can call `createAbstractionAccountFunc` function and pass in three arguments";
 
     const promptCreateContract = "If user want to create a new ERC20 token,you need to ask user for `name` and `symbol` about the contract,after user provide all above information you can call `createERC20TokenFunc` and pass in `name` and `symbol`.We will use ether.js to create the contract and after it's been successful deployed i will tell the the contract address.If user want to mint the new token you can then pass in the deployed address";
 
@@ -33,11 +31,11 @@ export default function Chat() {
 
     const promptCheckNativeTokenBalance = "If user want check his balance just call `checkNativeTokenBalanceFunc` function";
 
-    const promptCreateAbstractionAccountTransaction = "If user want to create an transaction,you need to get three infomations,`safeAddress` the address of Abstraction Account contract,`to_addess` the adderss to receive token,`amount` the amount of transaction after you get all above information call `createAbstractionAccountTransactionFunc`";
+    const promptCreateSafeTransaction = "If user want to create an safe transaction,you need to get three infomations,`safeAddress` the address of Abstraction Account contract,`to_addess` the adderss to receive token,`amount` the amount of transaction after you get all above information call `createAbstractionAccountTransactionFunc`";
 
-    const promptSignAbstractionAccountTransaction = "If user want to sign his above created aa transaction you need to get `safeAddress` the address of Abstraction Account contract,after you get the contract call `signAbstractionAccountTransactionFunc`";
+    const promptSignSafeTransaction = "If user want to sign his above created safe transaction you need to get `safeAddress` the address of Abstraction Account contract,after you get the contract call `signAbstractionAccountTransactionFunc`";
 
-    const promptExecuteAbstractionAccountTransaction = "If user want to execute his aa transaction you need to get `safeAddress` the address of Abstraction Account contract after you get the contract call `executeAbstractionAccountTransactionFunc`";
+    const promptExecuteSafeTransaction = "If user want to execute his above safe transaction you need to get `safeAddress` the address of Abstraction Account contract after you get the contract call `executeAbstractionAccountTransactionFunc`";
 
     const promptIntroduce = "Your name is Jarvis,when user call you Jarvis you can introduce yourself tell users about your name and what you can do for us";
 
@@ -46,7 +44,8 @@ export default function Chat() {
     const [inputValue, setInputValue] = useState('');
     const [chatLog, setChatLog] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [history, setHistory] = useState([{ "role": "system", "content": prompt }, { "role": "assistant", "content": promptSwitchNetwork }, { "role": "assistant", "content": promptCreateAbstractionAccount }, { "role": "assistant", "content": promptCreateContract }, { "role": "assistant", "content": promptCreateContract }, { "role": "assistant", "content": promptMintToken }, { "role": "assistant", "content": promptTransferNativeToken }, { "role": "assistant", "content": promptTransferToken }, { "role": "assistant", "content": promptCheckNativeTokenBalance }, { "role": "assistant", "content": promptSignAbstractionAccountTransaction }, { "role": "assistant", "content": promptCreateAbstractionAccountTransaction }, { "role": "assistant", "content": promptExecuteAbstractionAccountTransaction }, { "role": "assistant", "content": promptIntroduce }]);
+    const [history, setHistory] = useState([{ "role": "system", "content": prompt }, { "role": "assistant", "content": promptSwitchNetwork }, { "role": "assistant", "content": promptCreateAbstractionAccount }, { "role": "assistant", "content": promptCreateContract }, { "role": "assistant", "content": promptCreateContract }, { "role": "assistant", "content": promptMintToken }, { "role": "assistant", "content": promptTransferNativeToken }, { "role": "assistant", "content": promptTransferToken }, { "role": "assistant", "content": promptCheckNativeTokenBalance }, { "role": "assistant", "content": promptCreateSafeTransaction }, { "role": "assistant", "content": promptSignSafeTransaction }, { "role": "assistant", "content": promptExecuteSafeTransaction }, { "role": "assistant", "content": promptIntroduce }]);
+
     const [safeTransaction, setSafeTransaction] = useState('');
 
     //signer.
@@ -195,7 +194,16 @@ export default function Chat() {
             threshold
         }
 
-        const safeSdk = await safeFactory.deploySafe({ safeAccountConfig });
+        const options = {
+            gasPrice:Provider.getGasPrice(),
+            gasLimit: 10000000
+        }
+
+        // const nonce = Provider.getTransactionCount(signer.getAddress(), "latest");
+
+        const saltNonce = new Date().getTime();
+
+        const safeSdk = await safeFactory.deploySafe({ safeAccountConfig, saltNonce, options });
 
         const newSafeAddress = await safeSdk.getAddress();
         console.log(newSafeAddress);
@@ -205,7 +213,7 @@ export default function Chat() {
         setIsLoading(false);
     }
 
-    const createAbstractionAccountTransaction = async (obj)=>{
+    const createSafeTransaction = async (obj)=>{
         const safeSdk = await Safe.create({ ethAdapter: ethAdapter, safeAddress:obj.safeAddress })
         const safeTransactionData = {
             to: obj.to_address,
@@ -223,7 +231,7 @@ export default function Chat() {
         setIsLoading(false);
     }
 
-    const signAbstractionAccountTransaction = async (obj)=>{
+    const signSafeTransaction = async (obj)=>{
         const safeSdk2 = await Safe.create({ ethAdapter: ethAdapter, safeAddress: obj.safeAddress })
         const txHash = await safeSdk2.getTransactionHash(safeTransaction)
         const approveTxResponse = await safeSdk2.approveTransactionHash(txHash)
@@ -233,7 +241,7 @@ export default function Chat() {
         setIsLoading(false);
     }
 
-    const executeAbstractionAccountTransaction = async (obj)=>{
+    const executeSafeTransaction = async (obj)=>{
         const safeSdk3 = await Safe.create({ ethAdapter: ethAdapter, safeAddress: obj.safeAddress })
         const executeTxResponse = await safeSdk3.executeTransaction(safeTransaction)
         await executeTxResponse.transactionResponse?.wait()
@@ -279,7 +287,7 @@ export default function Chat() {
             model: "gpt-3.5-turbo",
             messages: message,
             max_tokens: 200,
-            temperature: 0.5,
+            temperature: 0.7,
             top_p: 1,
             frequency_penalty: 0.0,
             presence_penalty: 0.0,
@@ -288,12 +296,12 @@ export default function Chat() {
                 functions.mintERC20TokenFunc,
                 functions.transferERC20TokenFunc,
                 functions.switchNetworkFunc,
-                functions.createAbstractionAccountFunc,
                 functions.transferNativeTokenFunc,
                 functions.checkNativeTokenBalanceFunc,
-                functions.createAbstractionAccountTransactionFunc,
-                functions.signAbstractionAccountTransactionFunc,
-                functions.executeAbstractionAccountTransactionFunc
+                functions.createSafeTransactionFunc,
+                functions.signSafeTransactionFunc,
+                functions.executeSafeTransactionFunc,
+                functions.createAbstractionAccountFunc,
             ]
         };
 

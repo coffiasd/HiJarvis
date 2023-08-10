@@ -1,14 +1,30 @@
 [
   {
     "name": "Base Goerli",
-    "chainId":84531
+    "chainId": 84531
   },
-    {
+  {
     "name": "Zora Goerli",
-    "chainId":999
+    "chainId": 999
   },
   {
     "name": "Mode Sepolia",
-    "chainId":919
+    "chainId": 919
+  },
+  {
+    "name": "Optimism Goerli",
+    "chainId": 420
+  },
+  {
+    "name": "Mumbai",
+    "chainId": 80001
+  },
+  {
+    "name": "Mainnet",
+    "chainId": 1
+  },
+  {
+    "name": "Arbitrum",
+    "chainId": 42161
   }
 ]

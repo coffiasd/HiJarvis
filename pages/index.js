@@ -4,8 +4,6 @@ import dynamic from 'next/dynamic';
 import React from "react";
 import { Alert } from '../components/alert.jsx';
 import { FaRocket } from "react-icons/fa";
-import Link from "next/link";
-import Image from 'next/image';
 import { useRouter } from 'next/router'
 
 const Header = dynamic(() => import('../components/Header'), {
@@ -43,12 +41,13 @@ export default function Home() {
           <div className="flex flex-col mt-10">
 
             <ul className="text-xl grid justify-items-start">
-              <li className="my-2">1.create AA</li>
-              <li className="my-2">2.use AA send token</li>
-              <li className="my-2">3.transfer Native token</li>
-              <li className="my-2">4.switch network</li>
-              <li className="my-2">5.create ERC20 contract</li>
-              <li className="my-2">6.mint ERC20 token</li>
+              <li className="my-2">1.create abstraction account</li>
+              <li className="my-2">2.use aa to send token</li>
+              <li className="my-2">3.transfer native token</li>
+              <li className="my-2">4.create ERC20 contract</li>
+              <li className="my-2">5.mint ERC20 token</li>
+              <li className="my-2">6.switch network</li>
+              <li className="my-2">7.TODO ...</li>
               </ul>
 
           </div>

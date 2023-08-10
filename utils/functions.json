@@ -109,9 +109,9 @@
             }
         }
     },
-    "createAbstractionAccountTransactionFunc": {
-        "name": "createAbstractionAccountTransaction",
-        "description": "create abstraction account transaction",
+    "createSafeTransactionFunc": {
+        "name": "createSafeTransaction",
+        "description": "create safe transaction",
         "parameters": {
             "type": "object",
             "properties": {
@@ -130,9 +130,9 @@
             }
         }
     },
-    "signAbstractionAccountTransactionFunc": {
-        "name": "signAbstractionAccountTransaction",
-        "description": "sign an abstraction account transaction",
+    "signSafeTransactionFunc": {
+        "name": "signSafeTransaction",
+        "description": "sign an safe transaction",
         "parameters": {
             "type": "object",
             "properties": {
@@ -143,9 +143,9 @@
             }
         }
     },
-    "executeAbstractionAccountTransactionFunc": {
-        "name": "executeAbstractionAccountTransaction",
-        "description": "execute an abstraction account transaction",
+    "executeSafeTransactionFunc": {
+        "name": "executeSafeTransaction",
+        "description": "execute an safe transaction",
         "parameters": {
             "type": "object",
             "properties": {
