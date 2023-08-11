@@ -279,7 +279,7 @@ export default function Chat() {
 
 
     const sendMessage = (message) => {
-        const url = '/api/generate2';
+        const url = '/api/generate';
 
         console.log(message);
 

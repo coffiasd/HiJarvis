@@ -32,7 +32,7 @@ const handler = async (req: Request): Promise<any> => {
   // Convert the response into a friendly text-stream
   const stream = OpenAIStream(response);
 
-  return response;
+  return new Response(stream);
 //   return stream;
   // Respond with the stream
 //   return new StreamingTextResponse(stream);
