@@ -279,7 +279,7 @@ export default function Chat() {
 
 
     const sendMessage = (message) => {
-        const url = '/api/generate';
+        const url = '/api/chat';
 
         console.log(message);
 
@@ -308,8 +308,7 @@ export default function Chat() {
         setIsLoading(true);
 
         axios.post(url, data).then((response) => {
-            console.log("Res:",response);
-            return ;
+       
             if (response.data.choices[0].finish_reason == "function_call") {
                 console.log(response.data.choices[0].message.function_call.name + "(" + response.data.choices[0].message.function_call.arguments + ")");
                 eval(response.data.choices[0].message.function_call.name + "(" + response.data.choices[0].message.function_call.arguments + ")");
