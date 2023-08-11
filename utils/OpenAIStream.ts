@@ -37,11 +37,12 @@ export async function OpenAIStream(payload) {
           }
           try {
             const json = JSON.parse(data);
+
             console.log("AI:",json);
 
-            let text;
+            let text = '';
 
-            if (json.choices[1].finish_reason == "function_call"){
+            if (json.choices[0].finish_reason == "function_call"){
                 //function call
                 text =
                   json.choices[0].message.function_call.name +
