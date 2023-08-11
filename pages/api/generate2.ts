@@ -1,5 +1,5 @@
 import { Configuration, OpenAIApi } from "openai-edge";
-import { OpenAIStream, streamToResponse } from "ai";
+import { OpenAIStream, StreamingTextResponse } from "ai";
 
 // Create an OpenAI API client (that's edge friendly!)
 const config = new Configuration({
@@ -32,10 +32,10 @@ const handler = async (req: Request): Promise<any> => {
   // Convert the response into a friendly text-stream
   const stream = OpenAIStream(response);
 
-  return streamToResponse(stream, response);
+  // return streamToResponse(stream, response);
 //   return stream;
   // Respond with the stream
-//   return new StreamingTextResponse(stream);
+  return new StreamingTextResponse(stream);
 }
 
 export default handler;
