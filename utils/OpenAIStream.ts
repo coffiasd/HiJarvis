@@ -26,18 +26,6 @@ export async function OpenAIStream(payload) {
     body: JSON.stringify(payload),
   });
 
-//   const res = await axios.post(
-//     "https://api.openai.com/v1/chat/completions",
-//     JSON.stringify(payload),
-//     {
-//       headers: {
-//         "Content-Type": "application/json",
-//         Authorization: `Bearer ${process.env.OPENAI_API_KEY ?? ""}`,
-//       },
-//       httpsAgent: agent
-//     }
-//   );
-
   const stream = new ReadableStream({
     async start(controller) {
       function onParse(event: ParsedEvent | ReconnectInterval) {
@@ -49,6 +37,7 @@ export async function OpenAIStream(payload) {
           }
           try {
             const json = JSON.parse(data);
+            console.log("AI:",json);
             // const text = json;
             const text = json.choices[0].text;
             if (counter < 2 && (text.match(/\n/) || []).length) {
