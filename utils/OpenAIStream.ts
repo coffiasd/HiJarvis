@@ -3,6 +3,10 @@ import {
   ParsedEvent,
   ReconnectInterval,
 } from "eventsource-parser";
+
+// import fetch from 'fetch-with-proxy';
+// import { OpenAIStream, StreamingTextResponse } from "ai";
+
 // import axios from 'axios';
 // import { HttpsProxyAgent } from 'https-proxy-agent';
 

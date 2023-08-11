@@ -4632,6 +4632,16 @@
   dependencies:
     "reusify" "^1.0.4"
 
+"fetch-with-proxy@^3.0.1":
+  "integrity" "sha512-8C5JZ+Ea2eTOkFuQhB252QPgEc68LS7+8uNrFbYFs7t114Bgdj7hiYmtwkHhmN8TvafGVRbspMMD/Rg/tw0RwA=="
+  "resolved" "https://registry.npmmirror.com/fetch-with-proxy/-/fetch-with-proxy-3.0.1.tgz"
+  "version" "3.0.1"
+  dependencies:
+    "node-abort-controller" "^1.1.0"
+    "node-fetch" "^2.6.1"
+    "proxy-from-env" "^1.1.0"
+    "tunnel-agent" "^0.6.0"
+
 "file-entry-cache@^6.0.1":
   "integrity" "sha512-7Gps/XWymbLk2QLYK4NzpMOrYjMhdIxXuIvy2QBsLE6ljuodKvdkWs/cpyJJ3CVIVpH0Oi1Hvg1ovbMzLdFBBg=="
   "resolved" "https://registry.npmjs.org/file-entry-cache/-/file-entry-cache-6.0.1.tgz"
@@ -6886,6 +6896,11 @@
     "@next/swc-win32-ia32-msvc" "12.3.1"
     "@next/swc-win32-x64-msvc" "12.3.1"
 
+"node-abort-controller@^1.1.0":
+  "integrity" "sha512-79PYeJuj6S9+yOHirR0JBLFOgjB6sQCir10uN6xRx25iD+ZD4ULqgRn3MwWBRaQGB0vEgReJzWwJo42T1R6YbQ=="
+  "resolved" "https://registry.npmmirror.com/node-abort-controller/-/node-abort-controller-1.2.1.tgz"
+  "version" "1.2.1"
+
 "node-addon-api@^2.0.0":
   "integrity" "sha512-Ntyt4AIXyaLIuMHF6IOoTakB3K+RWxwtsHNRxllEoA6vPwP9o4866g6YWDLUdnucilZhmkxiHwHr11gAENw+QA=="
   "resolved" "https://registry.npmjs.org/node-addon-api/-/node-addon-api-2.0.2.tgz"
@@ -6906,7 +6921,7 @@
     "object.getownpropertydescriptors" "^2.0.3"
     "semver" "^5.7.0"
 
-"node-fetch@^2.6.11", "node-fetch@^2.6.7":
+"node-fetch@^2.6.1", "node-fetch@^2.6.11", "node-fetch@^2.6.7":
   "integrity" "sha512-4I6pdBY1EthSqDmJkiNk3JIT8cswwR9nfeW/cPdUagJYEQG7R95WRH74wpz7ma8Gh/9dI9FP+OU+0E4FvtA55w=="
   "resolved" "https://registry.npmmirror.com/node-fetch/-/node-fetch-2.6.11.tgz"
   "version" "2.6.11"

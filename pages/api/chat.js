@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import axios from 'axios';
 
-import { HttpsProxyAgent } from 'https-proxy-agent';
+// import { HttpsProxyAgent } from 'https-proxy-agent';
 
 export default async function handler(req, res) {
   const referer = req.headers.referer || req.headers.referrer; // get the referer from the request headers
