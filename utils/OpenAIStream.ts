@@ -38,8 +38,19 @@ export async function OpenAIStream(payload) {
           try {
             const json = JSON.parse(data);
             console.log("AI:",json);
-            // const text = json;
-            const text = json.choices[0].text;
+
+            let text;
+
+            if (json.choices[1].finish_reason == "function_call"){
+                //function call
+                text =
+                  json.choices[0].message.function_call.name +
+                  "|" +
+                  json.choices[0].message.function_call.arguments;
+            }else{
+                text = json.choices[0].message.content;
+            }
+             
             if (counter < 2 && (text.match(/\n/) || []).length) {
               return;
             }
