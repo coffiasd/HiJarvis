@@ -10,7 +10,8 @@ const openai = new OpenAIApi(config);
 // IMPORTANT! Set the runtime to edge
 export const runtime = "edge";
 
-export async function POST(req: Request) {
+// export async function POST(req: Request) {
+const handler = async (req: Request): Promise<any> => {
   // Extract the `prompt` from the body of the request
   const { prompt } = await req.json();
 
@@ -31,7 +32,10 @@ export async function POST(req: Request) {
   // Convert the response into a friendly text-stream
   const stream = OpenAIStream(response);
 
-  return stream;
+  return response;
+//   return stream;
   // Respond with the stream
 //   return new StreamingTextResponse(stream);
 }
+
+export default handler;
