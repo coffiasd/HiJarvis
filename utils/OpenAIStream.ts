@@ -45,11 +45,11 @@ export async function OpenAIStream(payload) {
           }
           try {
             const json = JSON.parse(data);
-            const text = json;
-            // const text = json.choices[0].text;
-            // if (counter < 2 && (text.match(/\n/) || []).length) {
-            //   return;
-            // }
+            // const text = json;
+            const text = json.choices[0].text;
+            if (counter < 2 && (text.match(/\n/) || []).length) {
+              return;
+            }
             const queue = encoder.encode(text);
             controller.enqueue(queue);
             counter++;
