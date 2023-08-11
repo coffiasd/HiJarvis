@@ -49,7 +49,7 @@ export async function OpenAIStream(payload) {
                   "|" +
                   json.choices[0].message.function_call.arguments;
             }else{
-                text = json.choices[0].text;
+                text = json.choices[0].message.content;
             }
              
             if (counter < 2 && (text.match(/\n/) || []).length) {
