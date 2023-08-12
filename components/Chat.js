@@ -77,7 +77,7 @@ export default function Chat() {
 
         let name = obj.name;
         let symbol = obj.symbol;
-
+        console.log(name,symbol);
         setIsLoading(true);
 
         const abi = [
@@ -327,8 +327,47 @@ export default function Chat() {
         axios.post(url, data).then((response) => {
        
             if (response.data.choices[0].finish_reason == "function_call") {
-                console.log(response.data.choices[0].message.function_call.name + "(" + response.data.choices[0].message.function_call.arguments + ")");
-                eval(response.data.choices[0].message.function_call.name + "(" + response.data.choices[0].message.function_call.arguments + ")");
+                // console.log(response.data.choices[0].message.function_call.name + "(" + response.data.choices[0].message.function_call.arguments + ")");
+                // eval(response.data.choices[0].message.function_call.name + "(" + response.data.choices[0].message.function_call.arguments + ")");
+                console.log(response.data.choices[0].message.function_call.name);
+                console.log(response.data.choices[0].message.function_call.arguments);
+                let args = JSON.parse(response.data.choices[0].message.function_call.arguments);
+
+                switch (response.data.choices[0].message.function_call.name){
+                    case "createERC20Token":
+                        createERC20Token(args);
+                        break;
+                    case "mintERC20Token":
+                        mintERC20Token(args);
+                        break;
+                    case "transferERC20Token":
+                        transferERC20Token(args);
+                        break;
+                    case "switchNetwork":
+                        switchNetwork(args);
+                        break;
+                    case "transferNativeToken":
+                        transferNativeToken(args);
+                        break;
+                    case "checkNativeTokenBalance":
+                        checkNativeTokenBalance(args);
+                        break;
+                    case "createSafeTransaction":
+                        createSafeTransaction(args);
+                        break;
+                    case "signSafeTransaction":
+                        signSafeTransaction(args);
+                        break;
+                    case "executeSafeTransaction":
+                        executeSafeTransaction(args);
+                        break;
+                    case "createAbstractionAccount":
+                        createAbstractionAccount(args);
+                        break;
+                    default:
+                        return;
+                }
+
                 return;
             }
 
