@@ -22,7 +22,7 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
       };
 
-      // let agent = new HttpsProxyAgent('http://127.0.0.1:10809');
+      // let agent = new HttpsProxyAgent('http://127.0.0.1:1089');
 
       const response = await axios.post(url, body, {
         headers: headers,

@@ -9,8 +9,12 @@ import ChainList from "../utils/chainlist.json";
 import Safe, { SafeFactory, SafeAccountConfig, EthersAdapter } from '@safe-global/protocol-kit'
 import prompts from "../utils/prompt.json";
 import functions from "../utils/functions.json";
+import { useAccount, useNetwork, useSwitchNetwork } from 'wagmi'
 
 export default function Chat() {
+    const { chain } = useNetwork();
+    const { address, isConnected } = useAccount();
+
     let promptStr = '';
     for (let i = 0; i < ChainList.length; i++) {
         promptStr = promptStr + 'chain name is:' + ChainList[i].name + ' and chainId is ' + ChainList[i].chainId + ',';
@@ -40,7 +44,6 @@ export default function Chat() {
     const promptIntroduce = "Your name is Jarvis,when user call you Jarvis you can introduce yourself tell users about your name and what you can do for us";
 
     
-
     const [inputValue, setInputValue] = useState('');
     const [chatLog, setChatLog] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -71,6 +74,8 @@ export default function Chat() {
     }
 
     const createERC20Token = async (obj) => {
+        await loginInfo();
+
         let name = obj.name;
         let symbol = obj.symbol;
 
@@ -96,6 +101,8 @@ export default function Chat() {
     }
 
     const mintERC20Token = async (obj) => {
+        await loginInfo();
+
         setIsLoading(true);
 
         setTimeout(() => {
@@ -112,6 +119,8 @@ export default function Chat() {
 
     //@notice transfer ERC20 tokens.
     const transferERC20Token = async (obj) => {
+        await loginInfo();
+
         let contract = obj.contract_address;
         let to_address = obj.to_address;
         let amount = ethers.utils.parseEther(obj.amount);
@@ -134,6 +143,8 @@ export default function Chat() {
 
     //@notice transfer native token.
     const transferNativeToken = async (obj) => {
+        await loginInfo();
+
         setTimeout(() => {
             setIsLoading(false);
         }, 22000);
@@ -159,6 +170,8 @@ export default function Chat() {
 
     //@notice switch networks.
     const switchNetwork = async (obj) => {
+        await loginInfo();
+
         setIsLoading(true);
         setTimeout(() => {
             setIsLoading(false);
@@ -180,6 +193,8 @@ export default function Chat() {
 
     //@notice powered By safe.
     const createAbstractionAccount = async (obj) => {
+        await loginInfo();
+
         setIsLoading(true);
         setTimeout(() => {
             setIsLoading(false);
@@ -214,6 +229,8 @@ export default function Chat() {
     }
 
     const createSafeTransaction = async (obj)=>{
+        await loginInfo();
+
         const safeSdk = await Safe.create({ ethAdapter: ethAdapter, safeAddress:obj.safeAddress })
         const safeTransactionData = {
             to: obj.to_address,
@@ -232,6 +249,8 @@ export default function Chat() {
     }
 
     const signSafeTransaction = async (obj)=>{
+        await loginInfo();
+
         const safeSdk2 = await Safe.create({ ethAdapter: ethAdapter, safeAddress: obj.safeAddress })
         const txHash = await safeSdk2.getTransactionHash(safeTransaction)
         const approveTxResponse = await safeSdk2.approveTransactionHash(txHash)
@@ -252,6 +271,8 @@ export default function Chat() {
     }
 
     const checkNativeTokenBalance = async () => {
+        await loginInfo();
+
         setIsLoading(true);
         setTimeout(() => {
             setIsLoading(false);
@@ -324,8 +345,17 @@ export default function Chat() {
         })
     }
 
+    const loginInfo = async ()=>{
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+        if (!accounts){
+            setChatLog((prevChatLog) => [...prevChatLog, { type: 'bot', message: `login metamask first` }]);
+        }
+
+    }
 
     useEffect(() => {
+
     }, [])
 
 

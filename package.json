@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 80",
     "lint": "next lint"
   },
   "dependencies": {
@@ -26,7 +26,6 @@
     "fetch-with-proxy": "^3.0.1",
     "https-proxy-agent": "^7.0.1",
     "next": "12.3.1",
-    "openai-edge": "^1.2.2",
     "react": "18.2.0",
     "react-chartjs-2": "^4.3.1",
     "react-countup": "^6.3.1",
