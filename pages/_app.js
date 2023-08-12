@@ -5,33 +5,34 @@ import { publicProvider } from 'wagmi/providers/public';
 //rainbow kit UI framework.
 import '@rainbow-me/rainbowkit/styles.css';
 import '../styles/Home.module.css';
+import { baseGoerli, zoraTestnet, goerli, optimismGoerli, polygonMumbai } from 'wagmi/chains'
 
 import {
   getDefaultWallets,
   RainbowKitProvider,
 } from '@rainbow-me/rainbowkit';
 
-const zen = {
-  id: 1663,
-  name: 'Gobi Testnet',
-  network: 'Gobi Testnet',
+const mode = {
+  id: 919,
+  name: 'Mode Sepolia',
+  network: 'Mode Sepolia',
   nativeCurrency: {
     decimals: 18,
-    name: 'ZEN',
-    symbol: 'ZEN',
+    name: 'ETH',
+    symbol: 'ETH',
   },
   rpcUrls: {
     public: {
-      http: ['https://gobi-testnet.horizenlabs.io/ethv1']
+      http: ['https://sepolia.mode.network']
     },
     default: {
-      http: ['https://gobi-testnet.horizenlabs.io/ethv1']
+      http: ['https://sepolia.mode.network']
     },
   },
   testnet: true,
 }
 
-const { chains, publicClient } = configureChains([zen], [publicProvider()])
+const { chains, publicClient } = configureChains([baseGoerli, mode, zoraTestnet, goerli, optimismGoerli, polygonMumbai], [publicProvider()])
 
 const { connectors } = getDefaultWallets({
   appName: 'My RainbowKit App',
