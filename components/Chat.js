@@ -23,7 +23,6 @@ export default function Chat() {
 
     const promptSwitchNetwork = `If user want to switch network,you need to ask for the name of network, ${promptStr} is the chainlist we support now, after user input the chain name,you need to convert it to chainId based on the json file.If user choose a network we are not supported now say sorry and tell them we are not support switch to this network`;
 
-    const promptCreateAbstractionAccount = "If user want to create abstraction account, you need to ask for three owner addresses before return `createAbstractionAccoun` function,after you get three owner address you can call `createAbstractionAccountFunc` function and pass in three arguments";
 
     const promptCreateContract = "If user want to create a new ERC20 token,you need to ask user for `name` and `symbol` about the contract,after user provide all above information you can call `createERC20TokenFunc` and pass in `name` and `symbol`.We will use ether.js to create the contract and after it's been successful deployed i will tell the the contract address.If user want to mint the new token you can then pass in the deployed address";
 
@@ -35,19 +34,21 @@ export default function Chat() {
 
     const promptCheckNativeTokenBalance = "If user want check his balance just call `checkNativeTokenBalanceFunc` function";
 
-    const promptCreateSafeTransaction = "If user want to create an safe transaction,you need to get three infomations,`safeAddress` the address of Abstraction Account contract,`to_addess` the adderss to receive token,`amount` the amount of transaction after you get all above information call `createAbstractionAccountTransactionFunc`";
+    const promptCreateSafeTransaction = "If user want to create an safe transaction,you need to get three infomations,`safeAddress` the address of Abstraction Account contract,`to_addess` the adderss to receive token,`amount` the amount of transaction after you get all above information call `createSafeTransactionFunc`";
 
-    const promptSignSafeTransaction = "If user want to sign his above created safe transaction you need to get `safeAddress` the address of Abstraction Account contract,after you get the contract call `signAbstractionAccountTransactionFunc`";
+    const promptSignSafeTransaction = "If user want to sign his above created safe transaction you need to get `safeAddress` the address of Abstraction Account contract,after you get the contract call `signSafeTransactionFunc`";
 
-    const promptExecuteSafeTransaction = "If user want to execute his above safe transaction you need to get `safeAddress` the address of Abstraction Account contract after you get the contract call `executeAbstractionAccountTransactionFunc`";
+    const promptExecuteSafeTransaction = "If user want to execute his above safe transaction you need to get `safeAddress` the address of Abstraction Account contract after you get the contract call `executeSafeTransactionFunc`";
 
     const promptIntroduce = "Your name is Jarvis,when user call you Jarvis you can introduce yourself tell users about your name and what you can do for us";
+
+    const promptCreateAbstractionAccount = "If user want to create an abstraction account, you need to get three owner addresses,after you get three owner address you can call `createAbstractionAccountFunc` function and pass in three arguments";
 
     
     const [inputValue, setInputValue] = useState('');
     const [chatLog, setChatLog] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [history, setHistory] = useState([{ "role": "system", "content": prompt }, { "role": "assistant", "content": promptSwitchNetwork }, { "role": "assistant", "content": promptCreateAbstractionAccount }, { "role": "assistant", "content": promptCreateContract }, { "role": "assistant", "content": promptCreateContract }, { "role": "assistant", "content": promptMintToken }, { "role": "assistant", "content": promptTransferNativeToken }, { "role": "assistant", "content": promptTransferToken }, { "role": "assistant", "content": promptCheckNativeTokenBalance }, { "role": "assistant", "content": promptCreateSafeTransaction }, { "role": "assistant", "content": promptSignSafeTransaction }, { "role": "assistant", "content": promptExecuteSafeTransaction }, { "role": "assistant", "content": promptIntroduce }]);
+    const [history, setHistory] = useState([{ "role": "system", "content": prompt }, { "role": "assistant", "content": promptSwitchNetwork }, { "role": "assistant", "content": promptCreateContract }, { "role": "assistant", "content": promptCreateContract }, { "role": "assistant", "content": promptMintToken }, { "role": "assistant", "content": promptTransferNativeToken }, { "role": "assistant", "content": promptTransferToken }, { "role": "assistant", "content": promptCheckNativeTokenBalance }, { "role": "assistant", "content": promptCreateSafeTransaction }, { "role": "assistant", "content": promptSignSafeTransaction }, { "role": "assistant", "content": promptExecuteSafeTransaction }, { "role": "assistant", "content": promptIntroduce }, { "role": "system", "content": promptCreateAbstractionAccount }]);
 
     const [safeTransaction, setSafeTransaction] = useState('');
 
@@ -304,11 +305,12 @@ export default function Chat() {
             model: "gpt-3.5-turbo",
             messages: message,
             max_tokens: 200,
-            temperature: 0.7,
+            temperature: 0.8,
             top_p: 1,
             frequency_penalty: 0.0,
             presence_penalty: 0.0,
             "functions": [
+                functions.createAbstractionAccountFunc,
                 functions.createERC20TokenFunc,
                 functions.mintERC20TokenFunc,
                 functions.transferERC20TokenFunc,
@@ -318,14 +320,13 @@ export default function Chat() {
                 functions.createSafeTransactionFunc,
                 functions.signSafeTransactionFunc,
                 functions.executeSafeTransactionFunc,
-                functions.createAbstractionAccountFunc,
             ]
         };
 
         setIsLoading(true);
 
         axios.post(url, data).then((response) => {
-       
+            
             if (response.data.choices[0].finish_reason == "function_call") {
                 // console.log(response.data.choices[0].message.function_call.name + "(" + response.data.choices[0].message.function_call.arguments + ")");
                 // eval(response.data.choices[0].message.function_call.name + "(" + response.data.choices[0].message.function_call.arguments + ")");
